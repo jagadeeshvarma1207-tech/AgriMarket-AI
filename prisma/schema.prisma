@@ -1,0 +1,326 @@
+// AgriMarket AI — Prisma Schema
+// Database: SQLite (development) — can be migrated to PostgreSQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+// SQLite doesn't support enums natively — stored as String with validation in app layer
+
+// Role: FARMER | CONSUMER
+// OrderStatus: PENDING | ACCEPTED | PREPARING | READY | COMPLETED | CANCELLED
+// QualityGrade: A | B | C | D | UNGRADED
+// ProductStatus: ACTIVE | INACTIVE | DRAFT
+// QuantityUnit: KG | GRAM | PIECE | DOZEN | LITER | BUNDLE | BAG | BOX | QUINTAL | TON
+
+// ─── MODELS ───────────────────────────────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  role           String   // "FARMER" | "CONSUMER"
+  name           String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  isActive       Boolean  @default(true)
+  emailVerified  DateTime?
+
+  // Relations
+  farmerProfile  FarmerProfile?
+  consumerProfile ConsumerProfile?
+  sessions       Session[]
+  accounts       Account[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model FarmerProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  farmName     String?
+  bio          String?
+  phone        String?
+  avatarUrl    String?
+  coverUrl     String?
+  isVerified   Boolean  @default(false)
+  totalRating  Float    @default(0)
+  reviewCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products     Product[]
+  location     Location?
+  orders       Order[]  @relation("FarmerOrders")
+  reviews      Review[] @relation("FarmerReviews")
+  messages     Message[]
+
+  @@map("farmer_profiles")
+}
+
+model ConsumerProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  phone          String?
+  avatarUrl      String?
+  deliveryAddress String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders         Order[]  @relation("ConsumerOrders")
+  reviews        Review[] @relation("ConsumerReviews")
+  favorites      Favorite[]
+  location       ConsumerLocation?
+
+  @@map("consumer_profiles")
+}
+
+model ConsumerLocation {
+  id                String   @id @default(cuid())
+  consumerId        String   @unique
+  latitude          Float
+  longitude         Float
+  city              String?
+  state             String?
+  country           String?
+  displayAddress    String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  consumer          ConsumerProfile @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+
+  @@map("consumer_locations")
+}
+
+model Location {
+  id              String   @id @default(cuid())
+  farmerId        String   @unique
+  latitude        Float
+  longitude       Float
+  // Approximate public-facing location (not exact home)
+  approxLatitude  Float?
+  approxLongitude Float?
+  city            String?
+  state           String?
+  country         String?
+  pincode         String?
+  // Public display address (no private home info)
+  displayAddress  String?
+  // Farmer-provided selling location description
+  sellingLocation String?
+  isPublic        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  farmer          FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@map("locations")
+}
+
+model Product {
+  id             String   @id @default(cuid())
+  farmerId       String
+  name           String
+  category       String   // Fruits | Vegetables | Grains | Herbs | Dairy | Other
+  description    String?
+  price          Float    // Price per unit
+  quantity       Float    // Available quantity
+  unit           String   // KG | GRAM | PIECE | DOZEN | LITER | BUNDLE | BAG | BOX | QUINTAL | TON
+  status         String   @default("ACTIVE") // ACTIVE | INACTIVE | DRAFT
+  qualityGrade   String   @default("UNGRADED") // A | B | C | D | UNGRADED
+  aiConfidence   Float?   // 0-100
+  harvestDate    DateTime?
+  expiryDate     DateTime?
+  tags           String?  // JSON array stored as string
+  totalRating    Float    @default(0)
+  reviewCount    Int      @default(0)
+  viewCount      Int      @default(0)
+  orderCount     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  farmer         FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  images         ProductImage[]
+  aiResults      AIQualityResult[]
+  orderItems     OrderItem[]
+  reviews        Review[]
+  favorites      Favorite[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id         String   @id @default(cuid())
+  productId  String
+  url        String
+  isPrimary  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  altText    String?
+  createdAt  DateTime @default(now())
+
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model AIQualityResult {
+  id               String   @id @default(cuid())
+  productId        String?
+  farmerId         String?
+  imageUrl         String
+  grade            String   // A | B | C | D | UNGRADED
+  confidence       Float    // 0-100
+  detectedFeatures String?  // JSON array as string
+  recommendations  String?  // JSON array as string
+  rawResult        String?  // Full model output JSON
+  modelVersion     String   @default("placeholder-v0")
+  isPlaceholder    Boolean  @default(true) // Mark as placeholder until real model
+  produceType      String?
+  createdAt        DateTime @default(now())
+
+  product          Product?  @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("ai_quality_results")
+}
+
+model Order {
+  id               String   @id @default(cuid())
+  consumerId       String
+  farmerId         String
+  status           String   @default("PENDING") // PENDING|ACCEPTED|PREPARING|READY|COMPLETED|CANCELLED
+  totalPrice       Float
+  deliveryType     String   @default("PICKUP") // PICKUP | DELIVERY
+  deliveryAddress  String?
+  consumerNote     String?
+  farmerNote       String?
+  cancelReason     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  consumer         ConsumerProfile @relation("ConsumerOrders", fields: [consumerId], references: [id])
+  farmer           FarmerProfile   @relation("FarmerOrders", fields: [farmerId], references: [id])
+  items            OrderItem[]
+  review           Review?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  productId  String
+  productName String  // Snapshot at order time
+  quantity   Float
+  unit       String
+  unitPrice  Float
+  totalPrice Float
+  createdAt  DateTime @default(now())
+
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String   @unique // One review per order
+  consumerId String
+  farmerId   String
+  productId  String?
+  stars      Int      // 1-5
+  title      String?
+  body       String?
+  isPublic   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  order      Order    @relation(fields: [orderId], references: [id])
+  consumer   ConsumerProfile @relation("ConsumerReviews", fields: [consumerId], references: [id])
+  farmer     FarmerProfile   @relation("FarmerReviews", fields: [farmerId], references: [id])
+  product    Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@map("reviews")
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  consumerId String
+  productId  String
+  createdAt  DateTime @default(now())
+
+  consumer   ConsumerProfile @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([consumerId, productId])
+  @@map("favorites")
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  farmerId   String
+  senderName String
+  senderEmail String?
+  senderPhone String?
+  subject    String?
+  body       String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  farmer     FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
