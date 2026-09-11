@@ -1,4 +1,5 @@
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n'
 
 interface OrderStatusBadgeProps {
   status: string
@@ -7,7 +8,8 @@ interface OrderStatusBadgeProps {
 
 export function OrderStatusBadge({ status, size = 'md' }: OrderStatusBadgeProps) {
   const color = ORDER_STATUS_COLORS[status] || '#6b7280'
-  const label = ORDER_STATUS_LABELS[status] || status
+  const { t } = useI18n()
+  const label = t(`orderStatus.${status}`, ORDER_STATUS_LABELS[status] || status)
 
   return (
     <span

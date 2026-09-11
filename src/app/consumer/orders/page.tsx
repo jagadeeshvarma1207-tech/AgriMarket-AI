@@ -7,6 +7,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/components/ui/Toast'
 import { formatPrice, formatDateTime, getNextOrderStatuses } from '@/lib/utils'
 import { ShoppingBag, Star } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
 
 export default function ConsumerOrdersPage() {
   const { success, error: toastError } = useToast()
@@ -15,6 +16,7 @@ export default function ConsumerOrdersPage() {
   const [reviewModal, setReviewModal] = useState<any>(null)
   const [reviewForm, setReviewForm] = useState({ stars: 5, title: '', body: '' })
   const [submitting, setSubmitting] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     fetch('/api/orders')
@@ -52,7 +54,7 @@ export default function ConsumerOrdersPage() {
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)' }}>
       <ConsumerNav />
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '40px 24px' }}>
-        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: 24 }}>My Orders</h2>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.6rem', marginBottom: 24 }}>{t('sidebar.orders', 'My Orders')}</h2>
 
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -61,9 +63,9 @@ export default function ConsumerOrdersPage() {
         ) : orders.length === 0 ? (
           <div className="empty-state">
             <ShoppingBag size={48} style={{ color: 'var(--color-text-muted)' }} />
-            <h3>No orders yet</h3>
-            <p>Browse products and place your first order from a local farmer!</p>
-            <a href="/consumer/browse" className="btn btn-primary">Browse Products</a>
+            <h3>{t('dashboard.noOrders', 'No orders yet')}</h3>
+            <p>{t('sidebar.browse', 'Browse products and place your first order from a local farmer!')}</p>
+            <a href="/consumer/browse" className="btn btn-primary">{t('sidebar.browse', 'Browse Products')}</a>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -72,7 +74,7 @@ export default function ConsumerOrdersPage() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>Order #{order.id.slice(-8).toUpperCase()}</span>
+                      <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>{t('sidebar.orders', 'Order')} #{order.id.slice(-8).toUpperCase()}</span>
                       <OrderStatusBadge status={order.status} />
                     </div>
                     <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>
@@ -92,7 +94,7 @@ export default function ConsumerOrdersPage() {
                       )}
                       <div>
                         <p style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text)', margin: 0 }}>{item.productName}</p>
-                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>{item.quantity} {item.unit} × {formatPrice(item.unitPrice)}</p>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', margin: 0 }}>{item.quantity} {t(`product.${item.unit.toLowerCase()}`, item.unit)} × {formatPrice(item.unitPrice)}</p>
                       </div>
                     </div>
                   ))}

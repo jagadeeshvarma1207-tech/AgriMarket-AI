@@ -5,6 +5,7 @@ import { GRADE_INFO, type QualityGrade } from '@/lib/ai-service'
 import { Sparkles, Upload, AlertCircle, CheckCircle, Info, Leaf, ChevronDown } from 'lucide-react'
 import { PRODUCT_CATEGORIES } from '@/lib/validation'
 import { useToast } from '@/components/ui/Toast'
+import { useI18n } from '@/lib/i18n'
 
 interface AIResult {
   id: string
@@ -27,6 +28,7 @@ export default function AIQualityPage() {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<AIResult | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
+  const { t } = useI18n()
 
   const handleFile = (f: File) => {
     setFile(f)
@@ -67,9 +69,9 @@ export default function AIQualityPage() {
         <div className="dashboard-header">
           <div>
             <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Sparkles size={20} color="var(--color-ai-light)" /> AI Quality Check
+              <Sparkles size={20} color="var(--color-ai-light)" /> {t('sidebar.aiQuality', 'AI Quality Check')}
             </h1>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>Upload a produce image for instant quality assessment</p>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{t('ai.upload', 'Upload a produce image for instant quality assessment')}</p>
           </div>
         </div>
 
@@ -89,7 +91,7 @@ export default function AIQualityPage() {
             {/* Upload Panel */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div className="card">
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 20 }}>Upload Produce Image</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 20 }}>{t('ai.upload', 'Upload Produce Image')}</h3>
 
                 {preview ? (
                   <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
@@ -118,8 +120,8 @@ export default function AIQualityPage() {
                   >
                     <Sparkles size={40} color="var(--color-ai)" />
                     <div style={{ textAlign: 'center' }}>
-                      <p style={{ color: 'var(--color-text)', fontWeight: 600, marginBottom: 4 }}>Drop produce image here</p>
-                      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>or click to browse</p>
+                      <p style={{ color: 'var(--color-text)', fontWeight: 600, marginBottom: 4 }}>{t('ai.dropImage', 'Drop produce image here')}</p>
+                      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>{t('common.or', 'or')} click to browse</p>
                       <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', marginTop: 4 }}>JPEG, PNG, WebP · Max 5MB</p>
                     </div>
                   </div>
@@ -134,14 +136,14 @@ export default function AIQualityPage() {
                 />
 
                 <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="form-label">Produce type hint (optional)</label>
+                  <label className="form-label">{t('ai.hint', 'Produce type hint (optional)')}</label>
                   <input
                     className="form-input"
                     placeholder="e.g. tomato, mango, onion..."
                     value={produceHint}
                     onChange={e => setProduceHint(e.target.value)}
                   />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Helps the AI focus on the right crop category</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{t('ai.hintDesc', 'Helps the AI focus on the right crop category')}</span>
                 </div>
 
                 <button
@@ -151,9 +153,9 @@ export default function AIQualityPage() {
                   onClick={analyze}
                 >
                   {loading ? (
-                    <><div className="spinner" style={{ width: 18, height: 18, borderTopColor: 'white' }} /> Analyzing with AI...</>
+                    <><div className="spinner" style={{ width: 18, height: 18, borderTopColor: 'white' }} /> {t('ai.analyzing', 'Analyzing with AI...')}</>
                   ) : (
-                    <><Sparkles size={18} /> Analyze Quality</>
+                    <><Sparkles size={18} /> {t('ai.analyze', 'Analyze Quality')}</>
                   )}
                 </button>
               </div>
@@ -164,8 +166,8 @@ export default function AIQualityPage() {
               {loading && (
                 <div className="card" style={{ textAlign: 'center', padding: 48 }}>
                   <div className="spinner spinner-lg" style={{ margin: '0 auto 20px', borderTopColor: 'var(--color-ai)' }} />
-                  <p style={{ color: 'var(--color-ai-light)', fontWeight: 600 }}>AI is analyzing your produce...</p>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Detecting visual quality indicators</p>
+                  <p style={{ color: 'var(--color-ai-light)', fontWeight: 600 }}>{t('ai.analyzing', 'AI is analyzing your produce...')}</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('ai.detecting', 'Detecting visual quality indicators')}</p>
                 </div>
               )}
 
@@ -199,7 +201,7 @@ export default function AIQualityPage() {
                   {/* Confidence Bar */}
                   <div style={{ marginBottom: 24 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>AI Confidence</span>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{t('ai.confidence', 'AI Confidence')}</span>
                       <span style={{ fontSize: '0.8rem', fontWeight: 700, color: gradeInfo.color }}>{result.confidence}%</span>
                     </div>
                     <div className="confidence-bar">
@@ -247,8 +249,8 @@ export default function AIQualityPage() {
               {!loading && !result && (
                 <div className="card" style={{ textAlign: 'center', padding: 48 }}>
                   <Sparkles size={48} color="var(--color-ai)" style={{ opacity: 0.3, margin: '0 auto 16px' }} />
-                  <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>Upload an image to begin analysis</p>
-                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>The AI will assess visual quality indicators and assign a grade from A to D</p>
+                  <p style={{ color: 'var(--color-text-secondary)', fontWeight: 500 }}>{t('ai.upload', 'Upload an image to begin analysis')}</p>
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>{t('ai.assess', 'The AI will assess visual quality indicators and assign a grade from A to D')}</p>
                 </div>
               )}
             </div>

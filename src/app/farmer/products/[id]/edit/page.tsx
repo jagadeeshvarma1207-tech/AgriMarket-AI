@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/Toast'
 import { PRODUCT_CATEGORIES, QUANTITY_UNITS } from '@/lib/validation'
 import { AlertCircle, Save, ArrowLeft, Trash2 } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n'
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -26,6 +27,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     if (!productId) return
@@ -155,11 +157,11 @@ export default function EditProductPage() {
         <div className="dashboard-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <Link href="/farmer/products" className="btn btn-ghost btn-sm" style={{ gap: 6 }}>
-              <ArrowLeft size={15} /> Back
+              <ArrowLeft size={15} /> {t('common.back', 'Back')}
             </Link>
             <div>
-              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>Edit Product</h1>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>Update your product listing</p>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>{t('sidebar.editProduct', 'Edit Product')}</h1>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{t('sidebar.editProduct', 'Update your product listing')}</p>
             </div>
           </div>
           <button
@@ -169,7 +171,7 @@ export default function EditProductPage() {
             disabled={deleting}
           >
             {deleting ? <div className="spinner" style={{ width: 14, height: 14 }} /> : <Trash2 size={14} />}
-            Delete
+            {t('common.delete', 'Delete')}
           </button>
         </div>
 
@@ -179,45 +181,45 @@ export default function EditProductPage() {
               {/* Main form */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div className="card">
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 20 }}>Product Information</h3>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 20 }}>{t('dashboard.overview', 'Product Information')}</h3>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div className="form-group">
-                      <label className="form-label">Product Name <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+                      <label className="form-label">{t('dashboard.productName', 'Product Name')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
                       <input className="form-input" placeholder="e.g. Fresh Organic Tomatoes" value={form.name} onChange={e => set('name', e.target.value)} />
                       {errors.name && <span className="form-error"><AlertCircle size={13} />{errors.name}</span>}
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Category <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+                      <label className="form-label">{t('product.category', 'Category')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
                       <select className="form-select" value={form.category} onChange={e => set('category', e.target.value)}>
-                        <option value="">Select category...</option>
-                        {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        <option value="">{t('common.select', 'Select category...')}</option>
+                        {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{t(`product.${c.toLowerCase().replace(/[\s&]+/g, '')}`, c)}</option>)}
                       </select>
                       {errors.category && <span className="form-error"><AlertCircle size={13} />{errors.category}</span>}
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Description</label>
+                      <label className="form-label">{t('product.description', 'Description')}</label>
                       <textarea className="form-textarea" placeholder="Describe your product..." value={form.description} onChange={e => set('description', e.target.value)} rows={4} style={{ resize: 'vertical' }} />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                       <div className="form-group">
-                        <label className="form-label">Price (₹) <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+                        <label className="form-label">{t('product.price', 'Price (₹)')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
                         <input className="form-input" type="number" min="0.01" step="0.01" placeholder="0.00" value={form.price} onChange={e => set('price', e.target.value)} />
                         {errors.price && <span className="form-error" style={{ fontSize: '0.7rem' }}>{errors.price}</span>}
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Quantity <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+                        <label className="form-label">{t('product.quantity', 'Quantity')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
                         <input className="form-input" type="number" min="0.01" step="0.01" placeholder="0" value={form.quantity} onChange={e => set('quantity', e.target.value)} />
                         {errors.quantity && <span className="form-error" style={{ fontSize: '0.7rem' }}>{errors.quantity}</span>}
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Unit <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+                        <label className="form-label">{t('product.unit', 'Unit')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
                         <select className="form-select" value={form.unit} onChange={e => set('unit', e.target.value)}>
-                          <option value="">Select...</option>
-                          {QUANTITY_UNITS.map(u => <option key={u.value} value={u.value}>{u.label}</option>)}
+                          <option value="">{t('common.select', 'Select...')}</option>
+                          {QUANTITY_UNITS.map(u => <option key={u.value} value={u.value}>{t(`product.${u.label.split(' ')[0].toLowerCase()}`, u.label)}</option>)}
                         </select>
                         {errors.unit && <span className="form-error" style={{ fontSize: '0.7rem' }}>{errors.unit}</span>}
                       </div>
@@ -225,21 +227,21 @@ export default function EditProductPage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                       <div className="form-group">
-                        <label className="form-label">Harvest Date</label>
+                        <label className="form-label">{t('product.harvestDate', 'Harvest Date')}</label>
                         <input className="form-input" type="date" value={form.harvestDate} onChange={e => set('harvestDate', e.target.value)} />
                       </div>
                       <div className="form-group">
-                        <label className="form-label">Best Before</label>
+                        <label className="form-label">{t('product.expiryDate', 'Best Before')}</label>
                         <input className="form-input" type="date" value={form.expiryDate} onChange={e => set('expiryDate', e.target.value)} />
                       </div>
                     </div>
 
                     <div className="form-group">
-                      <label className="form-label">Listing Status</label>
+                      <label className="form-label">{t('product.status', 'Listing Status')}</label>
                       <select className="form-select" value={form.status} onChange={e => set('status', e.target.value)}>
-                        <option value="ACTIVE">Published — Visible to buyers</option>
-                        <option value="INACTIVE">Unlisted — Hidden from buyers</option>
-                        <option value="DRAFT">Draft — Work in progress</option>
+                        <option value="ACTIVE">{t('product.active', 'Published — Visible to buyers')}</option>
+                        <option value="INACTIVE">{t('product.inactive', 'Unlisted — Hidden from buyers')}</option>
+                        <option value="DRAFT">{t('product.draft', 'Draft — Work in progress')}</option>
                       </select>
                     </div>
                   </div>
@@ -249,7 +251,7 @@ export default function EditProductPage() {
               {/* Sidebar */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div className="card">
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 16 }}>Product Images</h3>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: 16 }}>{t('product.images', 'Product Images')}</h3>
 
                   {/* Existing images */}
                   {existingImages.length > 0 && (
@@ -271,12 +273,12 @@ export default function EditProductPage() {
                   )}
 
                   <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>
-                    {existingImages.length > 0 ? 'Add more images below:' : 'Upload clear, well-lit photos. First image will be the main display image.'}
+                    {existingImages.length > 0 ? t('product.addMoreImages', 'Add more images below:') : t('product.imagesDesc', 'Upload clear, well-lit photos. First image will be the main display image.')}
                   </p>
                   <ImageUpload
                     onUpload={(url) => setImages(prev => [...prev, url])}
                     subDir="products"
-                    label="Upload Product Photo"
+                    label={t('product.uploadPhoto', 'Upload Product Photo')}
                     multiple={true}
                     existingUrls={images}
                     onRemove={(url) => setImages(prev => prev.filter(u => u !== url))}
@@ -285,10 +287,10 @@ export default function EditProductPage() {
 
                 <div style={{ display: 'flex', gap: 12 }}>
                   <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => router.push('/farmer/products')}>
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-                    {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : <><Save size={16} /> Save Changes</>}
+                    {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> {t('common.saving', 'Saving...')}</> : <><Save size={16} /> {t('common.save', 'Save Changes')}</>}
                   </button>
                 </div>
               </div>

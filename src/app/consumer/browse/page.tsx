@@ -5,6 +5,7 @@ import { ConsumerNav } from '@/components/consumer/ConsumerNav'
 import { ProductCard } from '@/components/marketplace/ProductCard'
 import { PRODUCT_CATEGORIES } from '@/lib/validation'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
 
 function BrowsePageInner() {
   const searchParams = useSearchParams()
@@ -14,6 +15,7 @@ function BrowsePageInner() {
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [showFilters, setShowFilters] = useState(false)
+  const { t } = useI18n()
 
   const [filters, setFilters] = useState({
     search: searchParams.get('search') || '',
@@ -65,21 +67,21 @@ function BrowsePageInner() {
             <Search size={18} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
             <input
               className="form-input"
-              placeholder="Search fruits, vegetables, grains..."
+              placeholder={t('consumer.searchPlaceholder', 'Search fruits, vegetables, grains...')}
               value={filters.search}
               onChange={e => setFilters(f => ({ ...f, search: e.target.value }))}
               style={{ paddingLeft: 44, fontSize: '1rem' }}
             />
           </div>
           <button className="btn btn-ghost" onClick={() => setShowFilters(!showFilters)} style={{ gap: 8 }}>
-            <SlidersHorizontal size={18} /> Filters
+            <SlidersHorizontal size={18} /> {t('consumer.filters', 'Filters')}
             {hasFilters && <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-primary)', display: 'inline-block' }} />}
           </button>
           <select className="form-select" style={{ width: 'auto' }} value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
-            <option value="createdAt">Newest</option>
-            <option value="popular">Most Popular</option>
-            <option value="price">Price: Low to High</option>
-            <option value="rating">Highest Rated</option>
+            <option value="createdAt">{t('common.newest', 'Newest')}</option>
+            <option value="popular">{t('common.popular', 'Most Popular')}</option>
+            <option value="price">{t('common.priceLowHigh', 'Price: Low to High')}</option>
+            <option value="rating">{t('common.highestRated', 'Highest Rated')}</option>
           </select>
         </div>
 
@@ -88,34 +90,34 @@ function BrowsePageInner() {
           <div className="filter-panel" style={{ marginBottom: 24 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
               <div>
-                <p className="filter-section-title">Category</p>
+                <p className="filter-section-title">{t('product.category', 'Category')}</p>
                 <select className="form-select" value={filters.category} onChange={e => setFilters(f => ({ ...f, category: e.target.value }))}>
-                  <option value="">All Categories</option>
-                  {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="">{t('common.viewAll', 'All Categories')}</option>
+                  {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{t(`product.${c.toLowerCase().replace(/[\s&]+/g, '')}`, c)}</option>)}
                 </select>
               </div>
               <div>
-                <p className="filter-section-title">Quality Grade</p>
+                <p className="filter-section-title">{t('ai.confidence', 'Quality Grade')}</p>
                 <select className="form-select" value={filters.grade} onChange={e => setFilters(f => ({ ...f, grade: e.target.value }))}>
-                  <option value="">Any Grade</option>
-                  <option value="A">Grade A — Premium</option>
-                  <option value="B">Grade B — Good</option>
-                  <option value="C">Grade C — Fair</option>
-                  <option value="D">Grade D — Economy</option>
+                  <option value="">{t('common.viewAll', 'Any Grade')}</option>
+                  <option value="A">{t('ai.grade', 'Grade')} A — Premium</option>
+                  <option value="B">{t('ai.grade', 'Grade')} B — Good</option>
+                  <option value="C">{t('ai.grade', 'Grade')} C — Fair</option>
+                  <option value="D">{t('ai.grade', 'Grade')} D — Economy</option>
                 </select>
               </div>
               <div>
-                <p className="filter-section-title">Min Price (₹)</p>
+                <p className="filter-section-title">{t('consumer.minPrice', 'Min Price (₹)')}</p>
                 <input className="form-input" type="number" min="0" placeholder="0" value={filters.minPrice} onChange={e => setFilters(f => ({ ...f, minPrice: e.target.value }))} />
               </div>
               <div>
-                <p className="filter-section-title">Max Price (₹)</p>
-                <input className="form-input" type="number" min="0" placeholder="Any" value={filters.maxPrice} onChange={e => setFilters(f => ({ ...f, maxPrice: e.target.value }))} />
+                <p className="filter-section-title">{t('consumer.maxPrice', 'Max Price (₹)')}</p>
+                <input className="form-input" type="number" min="0" placeholder={t('common.any', 'Any')} value={filters.maxPrice} onChange={e => setFilters(f => ({ ...f, maxPrice: e.target.value }))} />
               </div>
             </div>
             {hasFilters && (
               <button className="btn btn-ghost btn-sm" onClick={clearFilters} style={{ alignSelf: 'flex-start' }}>
-                <X size={14} /> Clear Filters
+                <X size={14} /> {t('common.clearFilters', 'Clear Filters')}
               </button>
             )}
           </div>
@@ -131,7 +133,7 @@ function BrowsePageInner() {
         )}
 
         <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginBottom: 20 }}>
-          {loading ? 'Searching...' : `${total} product${total !== 1 ? 's' : ''} found`}
+          {loading ? t('common.loading', 'Loading...') : `${total} ${t('product.products', 'products')} ${t('common.found', 'found')}`}
         </p>
 
         {loading ? (
@@ -141,9 +143,9 @@ function BrowsePageInner() {
         ) : products.length === 0 ? (
           <div className="empty-state">
             <Search size={48} style={{ color: 'var(--color-text-muted)' }} />
-            <h3>No products found</h3>
-            <p>Try adjusting your filters or search term.</p>
-            {hasFilters && <button className="btn btn-outline" onClick={clearFilters}>Clear All Filters</button>}
+            <h3>{t('msg.noProducts', 'No products found')}</h3>
+            <p>{t('msg.tryAdjusting', 'Try adjusting your filters or search term.')}</p>
+            {hasFilters && <button className="btn btn-outline" onClick={clearFilters}>{t('common.clearFilters', 'Clear All Filters')}</button>}
           </div>
         ) : (
           <div className="marketplace-grid">

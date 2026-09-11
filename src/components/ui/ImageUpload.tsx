@@ -3,6 +3,7 @@ import { useState, useRef } from 'react'
 import { Upload, X, Image as ImageIcon, CheckCircle } from 'lucide-react'
 import { formatBytes } from '@/lib/upload'
 import { useToast } from './Toast'
+import { useI18n } from '@/lib/i18n'
 
 interface ImageUploadProps {
   onUpload: (url: string) => void
@@ -18,6 +19,7 @@ export function ImageUpload({ onUpload, subDir = 'products', label = 'Upload Ima
   const [isDragOver, setIsDragOver] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { success, error } = useToast()
+  const { t } = useI18n()
 
   const uploadFile = async (file: File) => {
     setUploading(true)
@@ -32,9 +34,9 @@ export function ImageUpload({ onUpload, subDir = 'products', label = 'Upload Ima
       if (!res.ok) throw new Error(data.error || 'Upload failed')
 
       onUpload(data.url)
-      success('Image uploaded successfully')
+      success(t('common.success', 'Image uploaded successfully'))
     } catch (err: any) {
-      error(err.message || 'Upload failed')
+      error(err.message || t('common.error', 'Upload failed'))
     } finally {
       setUploading(false)
     }
@@ -65,7 +67,7 @@ export function ImageUpload({ onUpload, subDir = 'products', label = 'Upload Ima
         {uploading ? (
           <>
             <div className="spinner" />
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Uploading...</p>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>{t('common.loading', 'Uploading...')}</p>
           </>
         ) : (
           <>
@@ -73,7 +75,7 @@ export function ImageUpload({ onUpload, subDir = 'products', label = 'Upload Ima
             <div>
               <p style={{ color: 'var(--color-text)', fontWeight: 600, marginBottom: '4px' }}>{label}</p>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
-                Drag & drop or click to select
+                {t('product.dragDrop', 'Drag & drop or click to select')}
               </p>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
                 JPEG, PNG, WebP • Max 5MB

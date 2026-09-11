@@ -5,6 +5,7 @@ import { formatPrice } from '@/lib/utils'
 import { QualityBadge } from '@/components/ui/QualityBadge'
 import { QUANTITY_UNITS } from '@/lib/validation'
 import { useState } from 'react'
+import { useI18n } from '@/lib/i18n'
 
 interface ProductCardProps {
   product: {
@@ -36,6 +37,7 @@ export function ProductCard({ product, isFavorited, onToggleFavorite, onOrder, s
   const [favLoading, setFavLoading] = useState(false)
   const unitLabel = QUANTITY_UNITS.find(u => u.value === product.unit)?.label.split(' ')[0] || product.unit
   const imageUrl = product.images[0]?.url
+  const { t } = useI18n()
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -107,7 +109,7 @@ export function ProductCard({ product, isFavorited, onToggleFavorite, onOrder, s
               fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em',
               color: 'var(--color-primary-light)', fontWeight: 600,
             }}>
-              {product.category}
+              {t(`product.${product.category.toLowerCase().replace(/[\s&]+/g, '')}`, product.category)}
             </span>
           </div>
 
@@ -142,7 +144,7 @@ export function ProductCard({ product, isFavorited, onToggleFavorite, onOrder, s
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-              {product.quantity} {unitLabel} available
+              {product.quantity} {t(`product.${unitLabel.toLowerCase()}`, unitLabel)} {t('product.available', 'available')}
             </span>
             {onOrder && (
               <button
@@ -150,7 +152,7 @@ export function ProductCard({ product, isFavorited, onToggleFavorite, onOrder, s
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOrder(product.id) }}
               >
                 <ShoppingCart size={13} />
-                Order
+                {t('sidebar.orders', 'Order')}
               </button>
             )}
           </div>

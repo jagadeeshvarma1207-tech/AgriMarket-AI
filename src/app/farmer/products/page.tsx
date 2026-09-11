@@ -10,6 +10,7 @@ import {
   Plus, Edit2, Trash2, Eye, EyeOff, Package, Search, Filter, AlertCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n'
 
 export default function FarmerProductsPage() {
   const { success, error: toastError } = useToast()
@@ -18,6 +19,7 @@ export default function FarmerProductsPage() {
   const [search, setSearch] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
   const [toggling, setToggling] = useState<string | null>(null)
+  const { t } = useI18n()
 
   useEffect(() => {
     fetch('/api/farmer/products')
@@ -68,11 +70,11 @@ export default function FarmerProductsPage() {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>My Products</h1>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{products.length} total listings</p>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>{t('sidebar.myProducts', 'My Products')}</h1>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{products.length} {t('dashboard.totalProducts', 'total listings')}</p>
           </div>
           <Link href="/farmer/products/new" className="btn btn-primary btn-sm">
-            <Plus size={16} /> Add Product
+            <Plus size={16} /> {t('sidebar.addProduct', 'Add Product')}
           </Link>
         </div>
 
@@ -119,13 +121,13 @@ export default function FarmerProductsPage() {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                         <span style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text)' }}>{product.name}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', background: 'var(--color-bg-elevated)', padding: '2px 8px', borderRadius: 999 }}>{product.category}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', background: 'var(--color-bg-elevated)', padding: '2px 8px', borderRadius: 999 }}>{t(`product.${product.category.toLowerCase().replace(/[\s&]+/g, '')}`, product.category)}</span>
                         <QualityBadge grade={product.qualityGrade} size="sm" />
                       </div>
                       <div style={{ display: 'flex', gap: 16, fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-                        <span style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>{formatPrice(product.price)}/{unitLabel(product.unit)}</span>
-                        <span>{product.quantity} {unitLabel(product.unit)} available</span>
-                        <span>{product.orderCount} orders</span>
+                        <span style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>{formatPrice(product.price)}/{t(`product.${unitLabel(product.unit).toLowerCase()}`, unitLabel(product.unit))}</span>
+                        <span>{product.quantity} {t(`product.${unitLabel(product.unit).toLowerCase()}`, unitLabel(product.unit))} {t('product.available', 'available')}</span>
+                        <span>{product.orderCount} {t('sidebar.orders', 'orders')}</span>
                         <span>{formatDate(product.createdAt)}</span>
                       </div>
                     </div>

@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useToast } from '@/components/ui/Toast'
 import { formatPrice, formatDateTime, getNextOrderStatuses, ORDER_STATUS_LABELS } from '@/lib/utils'
 import { ShoppingBag, Phone, MessageSquare, ChevronDown, Clock } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
 
 export default function FarmerOrdersPage() {
   const { success, error: toastError } = useToast()
@@ -14,6 +15,7 @@ export default function FarmerOrdersPage() {
   const [filter, setFilter] = useState('all')
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null)
   const [updating, setUpdating] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     setLoading(true)
@@ -58,8 +60,8 @@ export default function FarmerOrdersPage() {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <div>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>Incoming Orders</h1>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{orders.length} order{orders.length !== 1 ? 's' : ''}</p>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', margin: 0 }}>{t('sidebar.orders', 'Incoming Orders')}</h1>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: 0 }}>{orders.length} {t('sidebar.orders', 'orders')}</p>
           </div>
         </div>
 
@@ -84,8 +86,7 @@ export default function FarmerOrdersPage() {
           ) : orders.length === 0 ? (
             <div className="empty-state">
               <ShoppingBag size={48} style={{ color: 'var(--color-text-muted)' }} />
-              <h3>No orders {filter !== 'all' ? `with status "${ORDER_STATUS_LABELS[filter] || filter}"` : 'yet'}</h3>
-              <p>When consumers place orders, they will appear here.</p>
+              <h3>{t('dashboard.noOrders', 'No orders yet')}</h3>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -109,7 +110,7 @@ export default function FarmerOrdersPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
                           <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text)' }}>
-                            Order #{order.id.slice(-8).toUpperCase()}
+                            {t('sidebar.orders', 'Order')} #{order.id.slice(-8).toUpperCase()}
                           </span>
                           <OrderStatusBadge status={order.status} size="sm" />
                         </div>
@@ -162,7 +163,7 @@ export default function FarmerOrdersPage() {
             <div className="divider" style={{ margin: '0' }} />
 
             <div>
-              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Order Items</p>
+              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('sidebar.orders', 'Order Items')}</p>
               {selectedOrder.items.map((item: any) => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--color-border)' }}>
                   <span style={{ color: 'var(--color-text)' }}>{item.quantity} {item.unit} {item.productName}</span>
@@ -170,13 +171,13 @@ export default function FarmerOrdersPage() {
                 </div>
               ))}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', fontWeight: 700 }}>
-                <span>Total</span>
+                <span>{t('dashboard.totalRevenue', 'Total').split(' ')[0]}</span>
                 <span style={{ color: 'var(--color-primary-light)', fontSize: '1.1rem' }}>{formatPrice(selectedOrder.totalPrice)}</span>
               </div>
             </div>
 
             <div>
-              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Consumer Details</p>
+              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('auth.consumer', 'Consumer Details')}</p>
               <p style={{ color: 'var(--color-text)', fontWeight: 600 }}>{selectedOrder.consumer?.user?.name}</p>
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Delivery: {selectedOrder.deliveryType}</p>
               {selectedOrder.deliveryAddress && <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>{selectedOrder.deliveryAddress}</p>}

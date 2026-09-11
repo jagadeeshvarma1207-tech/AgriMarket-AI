@@ -5,12 +5,14 @@ import { ProductCard } from '@/components/marketplace/ProductCard'
 import { useSession } from 'next-auth/react'
 import { Sparkles, TrendingUp, MapPin, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n'
 
 export default function ConsumerHomePage() {
   const { data: session } = useSession()
   const [featured, setFeatured] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const { t } = useI18n()
 
   useEffect(() => {
     Promise.all([
@@ -46,18 +48,18 @@ export default function ConsumerHomePage() {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
             <div>
               <p style={{ fontSize: '0.85rem', color: 'var(--color-primary-light)', fontWeight: 600, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Sparkles size={14} /> AI-Graded Fresh Produce
+                <Sparkles size={14} /> {t('home.aiQuality', 'AI-Graded Fresh Produce')}
               </p>
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', margin: '0 0 12px' }}>
-                Good morning, {session?.user.name?.split(' ')[0]} 👋
+                {t('dashboard.welcomeBack', 'Good morning')}, {session?.user?.name?.split(' ')[0]} 👋
               </h1>
               <p style={{ color: 'var(--color-text-secondary)', margin: 0, fontSize: '1rem' }}>
-                Discover fresh produce directly from local farmers
+                {t('home.marketplace', 'Discover fresh produce directly from local farmers')}
               </p>
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <Link href="/consumer/browse" className="btn btn-primary">Browse Products <ArrowRight size={16} /></Link>
-              <Link href="/consumer/nearby" className="btn btn-ghost">Nearby Farmers <MapPin size={16} /></Link>
+              <Link href="/consumer/browse" className="btn btn-primary">{t('market.browseProducts', 'Browse Products')} <ArrowRight size={16} /></Link>
+              <Link href="/consumer/nearby" className="btn btn-ghost">{t('market.nearbyFarmers', 'Nearby Farmers')} <MapPin size={16} /></Link>
             </div>
           </div>
         </div>
@@ -67,13 +69,13 @@ export default function ConsumerHomePage() {
       <div style={{ borderBottom: '1px solid var(--color-border)', overflowX: 'auto' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', gap: 8, padding: '16px 24px', width: 'max-content', minWidth: '100%' }}>
           {[
-            { label: '🍎 Fruits', cat: 'Fruits' },
-            { label: '🥦 Vegetables', cat: 'Vegetables' },
-            { label: '🌾 Grains', cat: 'Grains & Cereals' },
-            { label: '🌿 Herbs', cat: 'Herbs & Spices' },
-            { label: '🥛 Dairy', cat: 'Dairy & Eggs' },
-            { label: '🫘 Pulses', cat: 'Pulses & Legumes' },
-            { label: '🌱 Organic', cat: 'Organic Produce' },
+            { label: '🍎 ' + t('product.fruits', 'Fruits'), cat: 'Fruits' },
+            { label: '🥦 ' + t('product.vegetables', 'Vegetables'), cat: 'Vegetables' },
+            { label: '🌾 ' + t('nav.categories', 'Grains & Cereals'), cat: 'Grains & Cereals' },
+            { label: '🌿 ' + t('nav.categories', 'Herbs & Spices'), cat: 'Herbs & Spices' },
+            { label: '🥛 ' + t('nav.categories', 'Dairy & Eggs'), cat: 'Dairy & Eggs' },
+            { label: '🫘 ' + t('nav.categories', 'Pulses & Legumes'), cat: 'Pulses & Legumes' },
+            { label: '🌱 ' + t('nav.categories', 'Organic Produce'), cat: 'Organic Produce' },
           ].map(c => (
             <Link
               key={c.cat}
@@ -92,11 +94,11 @@ export default function ConsumerHomePage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <TrendingUp size={22} color="var(--color-primary-light)" /> Popular Products
+              <TrendingUp size={22} color="var(--color-primary-light)" /> {t('market.popular', 'Popular Products')}
             </h2>
-            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '4px 0 0' }}>Fresh and highly ordered by other consumers</p>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', margin: '4px 0 0' }}>{t('market.browseProducts', 'Fresh and highly ordered by other consumers')}</p>
           </div>
-          <Link href="/consumer/browse" className="btn btn-ghost btn-sm">View all <ArrowRight size={14} /></Link>
+          <Link href="/consumer/browse" className="btn btn-ghost btn-sm">{t('common.viewAll', 'View all')} <ArrowRight size={14} /></Link>
         </div>
 
         {loading ? (
@@ -107,7 +109,7 @@ export default function ConsumerHomePage() {
           </div>
         ) : featured.length === 0 ? (
           <div className="empty-state">
-            <p>No products available yet. Check back soon!</p>
+            <p>{t('msg.noProducts', 'No products available yet. Check back soon!')}</p>
           </div>
         ) : (
           <div className="marketplace-grid">

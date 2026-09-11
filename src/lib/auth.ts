@@ -56,24 +56,33 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          preferredLanguage: user.preferredLanguage,
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role
+        token.preferredLanguage = (user as any).preferredLanguage
       }
+      
+      // Handle manual session updates (like language change)
+      if (trigger === 'update' && session?.preferredLanguage) {
+        token.preferredLanguage = session.preferredLanguage
+      }
+
       // Always refresh role from DB to prevent role tampering
       if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, isActive: true },
+          select: { role: true, isActive: true, preferredLanguage: true },
         })
         if (dbUser) {
           token.role = dbUser.role
+          token.preferredLanguage = dbUser.preferredLanguage
         }
       }
       return token
@@ -82,6 +91,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        session.user.preferredLanguage = (token.preferredLanguage as string) || 'en'
       }
       return session
     },
@@ -97,10 +107,12 @@ declare module 'next-auth' {
       email: string
       name: string
       role: string
+      preferredLanguage: string
     }
   }
   interface User {
     role: string
+    preferredLanguage: string
   }
 }
 
@@ -108,5 +120,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string
     role: string
+    preferredLanguage: string
   }
 }

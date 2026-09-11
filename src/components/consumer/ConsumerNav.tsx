@@ -7,6 +7,8 @@ import {
   Home, Search, Grid3X3, MapPin, ShoppingBag,
   Heart, Star, User, LogOut, Menu, Leaf, X
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/consumer', icon: Home },
@@ -24,6 +26,7 @@ export function ConsumerNav() {
   const pathname = usePathname()
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useI18n()
 
   return (
     <>
@@ -53,6 +56,9 @@ export function ConsumerNav() {
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
+              // Convert label to translation key
+              let tKey = 'nav.' + item.label.toLowerCase().replace(' ', '')
+              if (item.label === 'My Orders') tKey = 'nav.orders'
               return (
                 <Link
                   key={item.href}
@@ -67,7 +73,7 @@ export function ConsumerNav() {
                   }}
                 >
                   <Icon size={15} />
-                  <span className="nav-label">{item.label}</span>
+                  <span className="nav-label">{t(tKey, item.label)}</span>
                 </Link>
               )
             })}
@@ -76,15 +82,16 @@ export function ConsumerNav() {
           {/* User menu */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
             <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'none' }} className="desktop-only">
-              Hi, {session?.user.name?.split(' ')[0]}
+              Hi, {session?.user?.name?.split(' ')[0]}
             </span>
+            <LanguageSelector />
             <button
               className="btn btn-ghost btn-sm"
               onClick={() => signOut({ callbackUrl: '/' })}
               style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
             >
               <LogOut size={15} />
-              <span className="desktop-only">Sign out</span>
+              <span className="desktop-only">{t('nav.signOut', 'Sign out')}</span>
             </button>
             <button
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', display: 'flex' }}
@@ -105,6 +112,8 @@ export function ConsumerNav() {
         }}>
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon
+            let tKey = 'nav.' + item.label.toLowerCase().replace(' ', '')
+            if (item.label === 'My Orders') tKey = 'nav.orders'
             return (
               <Link
                 key={item.href}
@@ -119,7 +128,7 @@ export function ConsumerNav() {
                 }}
               >
                 <Icon size={20} />
-                {item.label}
+                {t(tKey, item.label)}
               </Link>
             )
           })}

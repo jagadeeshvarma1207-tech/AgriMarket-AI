@@ -12,6 +12,7 @@ import { QUANTITY_UNITS } from '@/lib/validation'
 import { MapPin, Phone, MessageSquare, ShoppingCart, Heart, ArrowLeft, Leaf, Star, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { useI18n } from '@/lib/i18n'
 
 const MapComponent = dynamic(() => import('@/components/maps/LeafletMap'), { ssr: false })
 
@@ -23,6 +24,7 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { t } = useI18n()
   const [isFav, setIsFav] = useState(false)
   const [orderModal, setOrderModal] = useState(false)
   const [contactModal, setContactModal] = useState(false)
@@ -159,7 +161,7 @@ export default function ProductDetailPage() {
             {/* Main info */}
             <div className="card">
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-light)', fontWeight: 600, background: 'rgba(22,163,74,0.1)', padding: '3px 10px', borderRadius: 999 }}>{product.category}</span>
+                <span style={{ fontSize: '0.8rem', color: 'var(--color-primary-light)', fontWeight: 600, background: 'rgba(22,163,74,0.1)', padding: '3px 10px', borderRadius: 999 }}>{t(`product.${product.category.toLowerCase().replace(/[\s&]+/g, '')}`, product.category)}</span>
                 <button onClick={toggleFav} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                   <Heart size={22} fill={isFav ? '#ef4444' : 'none'} color={isFav ? '#ef4444' : 'var(--color-text-muted)'} />
                 </button>
@@ -176,16 +178,16 @@ export default function ProductDetailPage() {
 
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 16 }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 900, color: 'var(--color-primary-light)' }}>{formatPrice(product.price)}</span>
-                <span style={{ color: 'var(--color-text-muted)' }}>/ {unitLabel}</span>
+                <span style={{ color: 'var(--color-text-muted)' }}>/ {t(`product.${unitLabel.toLowerCase()}`, unitLabel)}</span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
                 <div style={{ background: 'var(--color-bg-secondary)', borderRadius: 10, padding: '10px 14px' }}>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Available</p>
-                  <p style={{ fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>{product.quantity} {unitLabel}</p>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('product.available', 'Available')}</p>
+                  <p style={{ fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>{product.quantity} {t(`product.${unitLabel.toLowerCase()}`, unitLabel)}</p>
                 </div>
                 <div style={{ background: 'var(--color-bg-secondary)', borderRadius: 10, padding: '10px 14px' }}>
-                  <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Orders</p>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('sidebar.orders', 'Orders')}</p>
                   <p style={{ fontWeight: 700, color: 'var(--color-text)', margin: 0 }}>{product.orderCount}</p>
                 </div>
               </div>
@@ -204,7 +206,7 @@ export default function ProductDetailPage() {
               {product.status === 'ACTIVE' && session?.user.role === 'CONSUMER' && (
                 <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
                   <button className="btn btn-primary" style={{ flex: 2, padding: '0.75rem' }} onClick={() => setOrderModal(true)}>
-                    <ShoppingCart size={18} /> Place Order
+                    <ShoppingCart size={18} /> {t('sidebar.orders', 'Place Order')}
                   </button>
                   <button className="btn btn-ghost" onClick={() => setContactModal(true)}>
                     <MessageSquare size={18} />

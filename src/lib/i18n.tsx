@@ -4,7 +4,8 @@
  * Supports: English, Telugu (తెలుగు), Hindi (हिन्दी)
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 
 export type Locale = 'en' | 'te' | 'hi'
 
@@ -18,18 +19,41 @@ export const LOCALES: { value: Locale; label: string; nativeLabel: string; flag:
 
 const translations: Record<Locale, Record<string, string>> = {
   en: {
-    // Navigation
+    // Navigation & Global
     'nav.home': 'Home',
     'nav.browse': 'Browse',
     'nav.search': 'Search',
     'nav.categories': 'Categories',
     'nav.nearby': 'Nearby',
-    'nav.orders': 'My Orders',
+    'nav.orders': 'Orders',
     'nav.favorites': 'Favorites',
     'nav.reviews': 'Reviews',
     'nav.profile': 'Profile',
-    'nav.signOut': 'Sign out',
+    'nav.settings': 'Settings',
+    'nav.signOut': 'Logout',
+    'nav.logout': 'Logout',
     'nav.language': 'Language',
+    'nav.dashboard': 'Dashboard',
+    'nav.products': 'Products',
+    'nav.marketplace': 'Marketplace',
+    'nav.cart': 'Cart',
+    'nav.notifications': 'Notifications',
+    'nav.messages': 'Messages',
+    'nav.help': 'Help',
+
+    // Home
+    'home.about': 'About',
+    'home.features': 'Features',
+    'home.howItWorks': 'How It Works',
+    'home.farmers': 'Farmers',
+    'home.buyers': 'Buyers',
+    'home.marketplace': 'Marketplace',
+    'home.aiQuality': 'AI Quality Assessment',
+    'home.contact': 'Contact',
+    'home.login': 'Login',
+    'home.register': 'Register',
+    'home.getStarted': 'Get Started',
+    'home.learnMore': 'Learn More',
 
     // Farmer Sidebar
     'sidebar.overview': 'Overview',
@@ -44,8 +68,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'sidebar.settings': 'Settings',
 
     // Dashboard
+    'dashboard.farmerDashboard': 'Farmer Dashboard',
+    'dashboard.buyerDashboard': 'Buyer Dashboard',
     'dashboard.overview': 'Dashboard Overview',
-    'dashboard.welcomeBack': 'Welcome back, farmer',
+    'dashboard.welcomeBack': 'Welcome',
     'dashboard.activeProducts': 'Active Products',
     'dashboard.pendingOrders': 'Pending Orders',
     'dashboard.totalRevenue': 'Total Revenue',
@@ -54,32 +80,69 @@ const translations: Record<Locale, Record<string, string>> = {
     'dashboard.quickActions': 'Quick Actions',
     'dashboard.noOrders': 'No orders yet',
     'dashboard.viewAll': 'View all',
+    'dashboard.sales': 'Sales',
+    'dashboard.earnings': 'Earnings',
+    'dashboard.orderHistory': 'Order History',
+    'dashboard.completedOrders': 'Completed Orders',
 
     // Products
-    'product.addNew': 'Add New Product',
+    'product.addNew': 'Add Product',
+    'product.addProduct': 'Add Product',
+    'product.editProduct': 'Edit Product',
+    'product.deleteProduct': 'Delete Product',
     'product.name': 'Product Name',
     'product.category': 'Category',
     'product.description': 'Description',
     'product.price': 'Price',
     'product.quantity': 'Quantity',
     'product.unit': 'Unit',
+    'product.location': 'Location',
+    'product.availability': 'Availability',
     'product.harvestDate': 'Harvest Date',
     'product.bestBefore': 'Best Before',
     'product.status': 'Listing Status',
     'product.published': 'Published',
     'product.draft': 'Draft',
     'product.images': 'Product Images',
-    'product.save': 'Save Changes',
+    'product.uploadImage': 'Upload Product Image',
+    'product.save': 'Save Product',
+    'product.update': 'Update Product',
     'product.publish': 'Publish Product',
     'product.cancel': 'Cancel',
     'product.edit': 'Edit',
     'product.delete': 'Delete',
-    'product.noProducts': 'No products yet',
+    'product.noProducts': 'No products found',
     'product.addFirst': 'Add Your First Product',
     'product.available': 'available',
     'product.orders': 'orders',
+    'product.productDetails': 'Product Details',
+    'product.fruits': 'Fruits',
+    'product.vegetables': 'Vegetables',
+    'product.farmer': 'Farmer',
+    'product.qualityGrade': 'Quality Grade',
+    'product.marketPrice': 'Market Price',
 
     // Orders
+    'order.orders': 'Orders',
+    'order.myOrders': 'My Orders',
+    'order.orderId': 'Order ID',
+    'order.product': 'Product',
+    'order.quantity': 'Quantity',
+    'order.price': 'Price',
+    'order.total': 'Total',
+    'order.date': 'Date',
+    'order.farmer': 'Farmer',
+    'order.buyer': 'Buyer',
+    'order.location': 'Location',
+    'order.pending': 'Pending',
+    'order.confirmed': 'Confirmed',
+    'order.processing': 'Processing',
+    'order.shipped': 'Shipped',
+    'order.delivered': 'Delivered',
+    'order.cancelled': 'Cancelled',
+    'order.orderDetails': 'Order Details',
+    'order.trackOrder': 'Track Order',
+    'order.cancelOrder': 'Cancel Order',
     'order.place': 'Place Order',
     'order.status.PENDING': 'Pending',
     'order.status.ACCEPTED': 'Accepted',
@@ -93,36 +156,72 @@ const translations: Record<Locale, Record<string, string>> = {
     'order.noOrders': 'No orders found',
     'order.delivery': 'Delivery',
     'order.pickup': 'Pickup',
-    'order.total': 'Total',
     'order.note': 'Add a note',
 
+    // Cart and Checkout
+    'cart.shoppingCart': 'Shopping Cart',
+    'cart.yourCart': 'Your Cart',
+    'cart.emptyCart': 'Empty Cart',
+    'cart.addToCart': 'Add to Cart',
+    'cart.buyNow': 'Buy Now',
+    'cart.remove': 'Remove',
+    'cart.quantity': 'Quantity',
+    'cart.price': 'Price',
+    'cart.subtotal': 'Subtotal',
+    'cart.total': 'Total',
+    'cart.checkout': 'Checkout',
+    'cart.deliveryAddress': 'Delivery Address',
+    'cart.payment': 'Payment',
+    'cart.placeOrder': 'Place Order',
+    'cart.confirmOrder': 'Confirm Order',
+
+    // Search and Filters
+    'market.search': 'Search',
+    'market.searchProducts': 'Search Products',
+    'market.filters': 'Filter',
+    'market.sort': 'Sort',
+    'market.category': 'Category',
+    'market.price': 'Price',
+    'market.quality': 'Quality',
+    'market.location': 'Location',
+    'market.sortBy': 'Sort By',
+    'market.allCategories': 'All Categories',
+    'market.newest': 'Newest First',
+    'market.popular': 'Most Popular',
+    'market.highestRated': 'Highest Rated',
+    'market.priceLow': 'Lowest Price',
+    'market.priceHigh': 'Highest Price',
+    'market.qualityHigh': 'Highest Quality',
+    'market.qualityLow': 'Lowest Quality',
+    'market.clearFilters': 'Clear Filters',
+    'market.applyFilters': 'Apply Filters',
+    'market.noProducts': 'No products found',
+    'market.browseProducts': 'Browse Products',
+    'market.nearbyFarmers': 'Nearby Farmers',
+
     // Auth
-    'auth.login': 'Sign In',
-    'auth.register': 'Create Account',
-    'auth.email': 'Email address',
+    'auth.login': 'Login',
+    'auth.register': 'Register',
+    'auth.signUp': 'Sign Up',
+    'auth.email': 'Email',
+    'auth.phoneNumber': 'Phone Number',
     'auth.password': 'Password',
-    'auth.name': 'Full name',
-    'auth.confirmPassword': 'Confirm password',
+    'auth.name': 'Name',
+    'auth.confirmPassword': 'Confirm Password',
+    'auth.forgotPassword': 'Forgot Password',
+    'auth.resetPassword': 'Reset Password',
+    'auth.sendOTP': 'Send OTP',
+    'auth.verifyOTP': 'Verify OTP',
+    'auth.enterOTP': 'Enter OTP',
+    'auth.resendOTP': 'Resend OTP',
+    'auth.verifyEmail': 'Verify Email',
+    'auth.verifyPhone': 'Verify Phone Number',
     'auth.farmer': 'Sell Produce',
     'auth.consumer': 'Buy Produce',
     'auth.noAccount': "Don't have an account?",
     'auth.haveAccount': 'Already have an account?',
     'auth.signIn': 'Sign In',
     'auth.createAccount': 'Create Account',
-
-    // Marketplace
-    'market.search': 'Search for tomatoes, mangoes, rice...',
-    'market.filters': 'Filters',
-    'market.sortBy': 'Sort By',
-    'market.allCategories': 'All Categories',
-    'market.newest': 'Newest First',
-    'market.popular': 'Most Popular',
-    'market.highestRated': 'Highest Rated',
-    'market.priceLow': 'Price: Low to High',
-    'market.priceHigh': 'Price: High to Low',
-    'market.noProducts': 'No products found',
-    'market.browseProducts': 'Browse Products',
-    'market.nearbyFarmers': 'Nearby Farmers',
 
     // Location
     'location.useCurrentLocation': 'Use Current Location',
@@ -135,13 +234,53 @@ const translations: Record<Locale, Record<string, string>> = {
     'location.expandRadius': 'Expand to 100km',
 
     // AI Quality
-    'ai.title': 'AI Quality Check',
-    'ai.upload': 'Upload produce photo for analysis',
-    'ai.analyzing': 'Analyzing...',
+    'ai.title': 'AI Quality Assessment',
+    'ai.upload': 'Upload Product Image',
+    'ai.selectImage': 'Select Image',
+    'ai.takePhoto': 'Take Photo',
+    'ai.analyze': 'Analyze Quality',
+    'ai.analyzing': 'Processing Image',
+    'ai.analysisComplete': 'Analysis Complete',
     'ai.grade': 'Quality Grade',
+    'ai.score': 'Quality Score',
     'ai.confidence': 'Confidence',
+    'ai.excellent': 'Excellent Quality',
+    'ai.good': 'Good Quality',
+    'ai.average': 'Average Quality',
+    'ai.poor': 'Poor Quality',
+    'ai.recommendation': 'Recommendation',
+    'ai.result': 'AI Result',
+    'ai.tryAgain': 'Try Again',
+    'ai.uploadAnother': 'Upload Another Image',
     'ai.notConnected': 'AI model not connected',
     'ai.modelRequired': 'Connect AI model to enable quality assessment',
+
+    // Profile and Settings
+    'profile.title': 'Profile',
+    'profile.personalInfo': 'Personal Information',
+    'profile.name': 'Name',
+    'profile.email': 'Email',
+    'profile.phone': 'Phone Number',
+    'profile.address': 'Address',
+    'profile.location': 'Location',
+    'profile.edit': 'Edit Profile',
+    'profile.save': 'Save Changes',
+    'profile.changePassword': 'Change Password',
+    'profile.language': 'Language',
+    'profile.account': 'Account',
+    'profile.settings': 'Settings',
+
+    // Notifications
+    'notification.title': 'Notifications',
+    'notification.newOrder': 'New Order',
+    'notification.orderUpdate': 'Order Update',
+    'notification.productUpdate': 'Product Update',
+    'notification.paymentUpdate': 'Payment Update',
+    'notification.aiComplete': 'AI Analysis Complete',
+    'notification.newMessage': 'New Message',
+    'notification.markAsRead': 'Mark as Read',
+    'notification.markAllAsRead': 'Mark All as Read',
+    'notification.noNotifications': 'No Notifications',
 
     // Reviews
     'review.submit': 'Submit Review',
@@ -152,11 +291,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'review.pendingReviews': 'Pending Reviews',
     'review.pastReviews': 'Past Reviews',
 
-    // Common
+    // Common Messages (Success/Error/Actions)
     'common.loading': 'Loading...',
     'common.saving': 'Saving...',
     'common.submitting': 'Submitting...',
-    'common.error': 'Something went wrong',
+    'common.error': 'Something went wrong.',
     'common.success': 'Success!',
     'common.retry': 'Try Again',
     'common.back': 'Back',
@@ -164,21 +303,87 @@ const translations: Record<Locale, Record<string, string>> = {
     'common.from': 'from',
     'common.by': 'by',
     'common.contact': 'Contact',
+    'common.save': 'Save',
+    'common.cancel': 'Cancel',
+    'common.delete': 'Delete',
+    'msg.productAdded': 'Product added successfully.',
+    'msg.productUpdated': 'Product updated successfully.',
+    'msg.productDeleted': 'Product deleted successfully.',
+    'msg.productAddFail': 'Failed to add product.',
+    'msg.productUpdateFail': 'Failed to update product.',
+    'msg.loginSuccess': 'Login successful.',
+    'msg.registerSuccess': 'Registration successful.',
+    'msg.invalidCredentials': 'Invalid credentials.',
+    'msg.accountExists': 'Account already exists.',
+    'msg.requiredField': 'Required field.',
+    'msg.invalidEmail': 'Invalid email.',
+    'msg.invalidPhone': 'Please enter a valid phone number.',
+    'msg.invalidOTP': 'Invalid OTP.',
+    'msg.otpExpired': 'OTP expired.',
+    'msg.orderPlaced': 'Order placed successfully.',
+    'msg.orderSuccessful': 'Order Successful.',
+    'msg.orderCancelled': 'Order cancelled successfully.',
+    'msg.uploadImage': 'Please upload an image.',
+    'msg.analysisFailed': 'Image analysis failed.',
+    'msg.noProducts': 'No products found.',
+    'msg.confirmDeleteProduct': 'Are you sure you want to delete this product?',
+
+    // Admin Dashboard
+    'admin.dashboard': 'Admin Dashboard',
+    'admin.users': 'Users',
+    'admin.farmers': 'Farmers',
+    'admin.buyers': 'Buyers',
+    'admin.products': 'Products',
+    'admin.orders': 'Orders',
+    'admin.reports': 'Reports',
+    'admin.analytics': 'Analytics',
+    'admin.aiResults': 'AI Results',
+    'admin.settings': 'Settings',
+    'admin.manageUsers': 'Manage Users',
+    'admin.manageProducts': 'Manage Products',
+    'admin.manageOrders': 'Manage Orders',
+    'admin.approve': 'Approve',
+    'admin.reject': 'Reject',
+    'admin.delete': 'Delete',
+    'admin.viewDetails': 'View Details',
   },
 
   te: {
-    // Navigation
+    // Navigation & Global
     'nav.home': 'హోమ్',
     'nav.browse': 'బ్రౌజ్',
     'nav.search': 'వెతుకు',
     'nav.categories': 'వర్గాలు',
     'nav.nearby': 'సమీపంలో',
-    'nav.orders': 'నా ఆర్డర్లు',
+    'nav.orders': 'ఆర్డర్లు',
     'nav.favorites': 'ఇష్టాలు',
     'nav.reviews': 'సమీక్షలు',
     'nav.profile': 'ప్రొఫైల్',
-    'nav.signOut': 'సైన్ అవుట్',
+    'nav.settings': 'సెట్టింగులు',
+    'nav.signOut': 'లాగ్ అవుట్',
+    'nav.logout': 'లాగ్ అవుట్',
     'nav.language': 'భాష',
+    'nav.dashboard': 'డాష్‌బోర్డ్',
+    'nav.products': 'ఉత్పత్తులు',
+    'nav.marketplace': 'మార్కెట్',
+    'nav.cart': 'కార్ట్',
+    'nav.notifications': 'నోటిఫికేషన్లు',
+    'nav.messages': 'సందేశాలు',
+    'nav.help': 'సహాయం',
+
+    // Home
+    'home.about': 'మా గురించి',
+    'home.features': 'లక్షణాలు',
+    'home.howItWorks': 'ఎలా పనిచేస్తుంది',
+    'home.farmers': 'రైతులు',
+    'home.buyers': 'కొనుగోలుదారులు',
+    'home.marketplace': 'మార్కెట్',
+    'home.aiQuality': 'AI నాణ్యత అంచనా',
+    'home.contact': 'సంప్రదించండి',
+    'home.login': 'లాగిన్',
+    'home.register': 'నమోదు చేసుకోండి',
+    'home.getStarted': 'ప్రారంభించండి',
+    'home.learnMore': 'మరింత తెలుసుకోండి',
 
     // Farmer Sidebar
     'sidebar.overview': 'అవలోకనం',
@@ -193,8 +398,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'sidebar.settings': 'సెట్టింగులు',
 
     // Dashboard
+    'dashboard.farmerDashboard': 'రైతు డాష్‌బోర్డ్',
+    'dashboard.buyerDashboard': 'కొనుగోలుదారు డాష్‌బోర్డ్',
     'dashboard.overview': 'డాష్‌బోర్డ్ అవలోకనం',
-    'dashboard.welcomeBack': 'స్వాగతం, రైతు',
+    'dashboard.welcomeBack': 'స్వాగతం',
     'dashboard.activeProducts': 'క్రియాశీల ఉత్పత్తులు',
     'dashboard.pendingOrders': 'పెండింగ్ ఆర్డర్లు',
     'dashboard.totalRevenue': 'మొత్తం ఆదాయం',
@@ -203,22 +410,33 @@ const translations: Record<Locale, Record<string, string>> = {
     'dashboard.quickActions': 'త్వరిత చర్యలు',
     'dashboard.noOrders': 'ఆర్డర్లు లేవు',
     'dashboard.viewAll': 'అన్నీ చూడు',
+    'dashboard.sales': 'అమ్మకాలు',
+    'dashboard.earnings': 'సంపాదన',
+    'dashboard.orderHistory': 'ఆర్డర్ చరిత్ర',
+    'dashboard.completedOrders': 'పూర్తయిన ఆర్డర్లు',
 
     // Products
-    'product.addNew': 'కొత్త ఉత్పత్తి జోడించు',
+    'product.addNew': 'ఉత్పత్తిని జోడించండి',
+    'product.addProduct': 'ఉత్పత్తిని జోడించండి',
+    'product.editProduct': 'ఉత్పత్తిని సవరించండి',
+    'product.deleteProduct': 'ఉత్పత్తిని తొలగించండి',
     'product.name': 'ఉత్పత్తి పేరు',
     'product.category': 'వర్గం',
     'product.description': 'వివరణ',
     'product.price': 'ధర',
     'product.quantity': 'పరిమాణం',
     'product.unit': 'యూనిట్',
+    'product.location': 'స్థానం',
+    'product.availability': 'లభ్యత',
     'product.harvestDate': 'కోత తేదీ',
     'product.bestBefore': 'గడువు తేదీ',
     'product.status': 'జాబితా స్థితి',
     'product.published': 'ప్రచురించబడింది',
     'product.draft': 'డ్రాఫ్ట్',
     'product.images': 'ఉత్పత్తి చిత్రాలు',
+    'product.uploadImage': 'ఉత్పత్తి చిత్రాన్ని అప్లోడ్ చేయండి',
     'product.save': 'మార్పులు సేవ్ చేయి',
+    'product.update': 'ఉత్పత్తిని అప్‌డేట్ చేయండి',
     'product.publish': 'ఉత్పత్తిని ప్రచురించు',
     'product.cancel': 'రద్దు చేయి',
     'product.edit': 'సవరించు',
@@ -227,8 +445,34 @@ const translations: Record<Locale, Record<string, string>> = {
     'product.addFirst': 'మీ మొదటి ఉత్పత్తి జోడించండి',
     'product.available': 'అందుబాటులో',
     'product.orders': 'ఆర్డర్లు',
+    'product.productDetails': 'ఉత్పత్తి వివరాలు',
+    'product.fruits': 'పండ్లు',
+    'product.vegetables': 'కూరగాయలు',
+    'product.farmer': 'రైతు',
+    'product.qualityGrade': 'నాణ్యత గ్రేడ్',
+    'product.marketPrice': 'మార్కెట్ ధర',
 
     // Orders
+    'order.orders': 'ఆర్డర్లు',
+    'order.myOrders': 'నా ఆర్డర్లు',
+    'order.orderId': 'ఆర్డర్ ID',
+    'order.product': 'ఉత్పత్తి',
+    'order.quantity': 'పరిమాణం',
+    'order.price': 'ధర',
+    'order.total': 'మొత్తం',
+    'order.date': 'తేదీ',
+    'order.farmer': 'రైతు',
+    'order.buyer': 'కొనుగోలుదారు',
+    'order.location': 'స్థానం',
+    'order.pending': 'పెండింగ్',
+    'order.confirmed': 'నిర్ధారించబడింది',
+    'order.processing': 'ప్రాసెస్ అవుతోంది',
+    'order.shipped': 'రవాణా చేయబడింది',
+    'order.delivered': 'డెలివరీ చేయబడింది',
+    'order.cancelled': 'రద్దు చేయబడింది',
+    'order.orderDetails': 'ఆర్డర్ వివరాలు',
+    'order.trackOrder': 'ఆర్డర్‌ను ట్రాక్ చేయండి',
+    'order.cancelOrder': 'ఆర్డర్‌ను రద్దు చేయండి',
     'order.place': 'ఆర్డర్ చేయి',
     'order.status.PENDING': 'పెండింగ్',
     'order.status.ACCEPTED': 'ఆమోదించబడింది',
@@ -242,36 +486,72 @@ const translations: Record<Locale, Record<string, string>> = {
     'order.noOrders': 'ఆర్డర్లు కనుగొనబడలేదు',
     'order.delivery': 'డెలివరీ',
     'order.pickup': 'పికప్',
-    'order.total': 'మొత్తం',
     'order.note': 'గమనిక జోడించు',
 
+    // Cart and Checkout
+    'cart.shoppingCart': 'షాపింగ్ కార్ట్',
+    'cart.yourCart': 'మీ కార్ట్',
+    'cart.emptyCart': 'ఖాళీ కార్ట్',
+    'cart.addToCart': 'కార్ట్‌కు జోడించు',
+    'cart.buyNow': 'ఇప్పుడే కొనండి',
+    'cart.remove': 'తొలగించు',
+    'cart.quantity': 'పరిమాణం',
+    'cart.price': 'ధర',
+    'cart.subtotal': 'ఉపమొత్తం',
+    'cart.total': 'మొత్తం',
+    'cart.checkout': 'చెక్అవుట్',
+    'cart.deliveryAddress': 'డెలివరీ చిరునామా',
+    'cart.payment': 'చెల్లింపు',
+    'cart.placeOrder': 'ఆర్డర్ ప్లేస్ చేయండి',
+    'cart.confirmOrder': 'ఆర్డర్‌ను నిర్ధారించండి',
+
+    // Search and Filters
+    'market.search': 'వెతుకు',
+    'market.searchProducts': 'ఉత్పత్తులను శోధించండి',
+    'market.filters': 'ఫిల్టర్',
+    'market.sort': 'క్రమబద్ధీకరించు',
+    'market.category': 'వర్గం',
+    'market.price': 'ధర',
+    'market.quality': 'నాణ్యత',
+    'market.location': 'స్థానం',
+    'market.sortBy': 'క్రమబద్ధీకరించు',
+    'market.allCategories': 'అన్ని వర్గాలు',
+    'market.newest': 'కొత్తవి ముందు',
+    'market.popular': 'అత్యంత ప్రసిద్ధ',
+    'market.highestRated': 'అత్యధిక రేటింగ్',
+    'market.priceLow': 'తక్కువ ధర',
+    'market.priceHigh': 'అధిక ధర',
+    'market.qualityHigh': 'అత్యధిక నాణ్యత',
+    'market.qualityLow': 'అతి తక్కువ నాణ్యత',
+    'market.clearFilters': 'ఫిల్టర్లను క్లియర్ చేయి',
+    'market.applyFilters': 'ఫిల్టర్లను వర్తించు',
+    'market.noProducts': 'ఉత్పత్తులు కనుగొనబడలేదు',
+    'market.browseProducts': 'ఉత్పత్తులు చూడు',
+    'market.nearbyFarmers': 'సమీప రైతులు',
+
     // Auth
-    'auth.login': 'సైన్ ఇన్',
-    'auth.register': 'ఖాతా సృష్టించు',
-    'auth.email': 'ఇమెయిల్ చిరునామా',
+    'auth.login': 'లాగిన్',
+    'auth.register': 'నమోదు',
+    'auth.signUp': 'సైన్ అప్',
+    'auth.email': 'ఇమెయిల్',
+    'auth.phoneNumber': 'ఫోన్ నంబర్',
     'auth.password': 'పాస్‌వర్డ్',
-    'auth.name': 'పూర్తి పేరు',
+    'auth.name': 'పేరు',
     'auth.confirmPassword': 'పాస్‌వర్డ్ నిర్ధారించు',
+    'auth.forgotPassword': 'పాస్‌వర్డ్ మర్చిపోయారా',
+    'auth.resetPassword': 'పాస్‌వర్డ్ రీసెట్ చేయండి',
+    'auth.sendOTP': 'OTP పంపండి',
+    'auth.verifyOTP': 'OTP ధృవీకరించండి',
+    'auth.enterOTP': 'OTP ఎంటర్ చేయండి',
+    'auth.resendOTP': 'OTPని మళ్లీ పంపండి',
+    'auth.verifyEmail': 'ఇమెయిల్ ధృవీకరించండి',
+    'auth.verifyPhone': 'ఫోన్ నంబర్ ధృవీకరించండి',
     'auth.farmer': 'పంటను అమ్మండి',
     'auth.consumer': 'పంటను కొనండి',
     'auth.noAccount': 'ఖాతా లేదా?',
     'auth.haveAccount': 'ఇప్పటికే ఖాతా ఉందా?',
     'auth.signIn': 'సైన్ ఇన్',
     'auth.createAccount': 'ఖాతా సృష్టించు',
-
-    // Marketplace
-    'market.search': 'టమాటాలు, మామిడికాయలు, బియ్యం వెతకండి...',
-    'market.filters': 'ఫిల్టర్లు',
-    'market.sortBy': 'క్రమబద్ధీకరించు',
-    'market.allCategories': 'అన్ని వర్గాలు',
-    'market.newest': 'కొత్తవి ముందు',
-    'market.popular': 'అత్యంత ప్రసిద్ధ',
-    'market.highestRated': 'అత్యధిక రేటింగ్',
-    'market.priceLow': 'ధర: తక్కువ నుండి ఎక్కువ',
-    'market.priceHigh': 'ధర: ఎక్కువ నుండి తక్కువ',
-    'market.noProducts': 'ఉత్పత్తులు కనుగొనబడలేదు',
-    'market.browseProducts': 'ఉత్పత్తులు చూడు',
-    'market.nearbyFarmers': 'సమీప రైతులు',
 
     // Location
     'location.useCurrentLocation': 'ప్రస్తుత స్థానం ఉపయోగించు',
@@ -285,12 +565,52 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // AI Quality
     'ai.title': 'AI నాణ్యత తనిఖీ',
-    'ai.upload': 'విశ్లేషణ కోసం పంట ఫోటో అప్లోడ్ చేయండి',
+    'ai.upload': 'ఉత్పత్తి చిత్రాన్ని అప్లోడ్ చేయండి',
+    'ai.selectImage': 'చిత్రాన్ని ఎంచుకోండి',
+    'ai.takePhoto': 'ఫోటో తీయండి',
+    'ai.analyze': 'నాణ్యతను విశ్లేషించండి',
     'ai.analyzing': 'విశ్లేషిస్తోంది...',
+    'ai.analysisComplete': 'విశ్లేషణ పూర్తయింది',
     'ai.grade': 'నాణ్యత గ్రేడ్',
+    'ai.score': 'నాణ్యత స్కోరు',
     'ai.confidence': 'నమ్మకం',
+    'ai.excellent': 'అత్యుత్తమ నాణ్యత',
+    'ai.good': 'మంచి నాణ్యత',
+    'ai.average': 'సగటు నాణ్యత',
+    'ai.poor': 'తక్కువ నాణ్యత',
+    'ai.recommendation': 'సిఫార్సు',
+    'ai.result': 'AI ఫలితం',
+    'ai.tryAgain': 'మళ్ళీ ప్రయత్నించు',
+    'ai.uploadAnother': 'మరో చిత్రాన్ని అప్లోడ్ చేయండి',
     'ai.notConnected': 'AI మోడల్ కనెక్ట్ కాలేదు',
     'ai.modelRequired': 'నాణ్యత అంచనాను ప్రారంభించడానికి AI మోడల్ కనెక్ట్ చేయండి',
+
+    // Profile and Settings
+    'profile.title': 'ప్రొఫైల్',
+    'profile.personalInfo': 'వ్యక్తిగత సమాచారం',
+    'profile.name': 'పేరు',
+    'profile.email': 'ఇమెయిల్',
+    'profile.phone': 'ఫోన్ నంబర్',
+    'profile.address': 'చిరునామా',
+    'profile.location': 'స్థానం',
+    'profile.edit': 'ప్రొఫైల్ సవరించండి',
+    'profile.save': 'మార్పులు సేవ్ చేయి',
+    'profile.changePassword': 'పాస్‌వర్డ్ మార్చండి',
+    'profile.language': 'భాష',
+    'profile.account': 'ఖాతా',
+    'profile.settings': 'సెట్టింగులు',
+
+    // Notifications
+    'notification.title': 'నోటిఫికేషన్లు',
+    'notification.newOrder': 'కొత్త ఆర్డర్',
+    'notification.orderUpdate': 'ఆర్డర్ అప్‌డేట్',
+    'notification.productUpdate': 'ఉత్పత్తి అప్‌డేట్',
+    'notification.paymentUpdate': 'చెల్లింపు అప్‌డేట్',
+    'notification.aiComplete': 'AI విశ్లేషణ పూర్తయింది',
+    'notification.newMessage': 'కొత్త సందేశం',
+    'notification.markAsRead': 'చదివినట్లు గుర్తించు',
+    'notification.markAllAsRead': 'అన్నింటినీ చదివినట్లు గుర్తించు',
+    'notification.noNotifications': 'నోటిఫికేషన్లు లేవు',
 
     // Reviews
     'review.submit': 'సమీక్ష సమర్పించు',
@@ -301,11 +621,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'review.pendingReviews': 'పెండింగ్ సమీక్షలు',
     'review.pastReviews': 'గత సమీక్షలు',
 
-    // Common
+    // Common Messages
     'common.loading': 'లోడవుతోంది...',
     'common.saving': 'సేవ్ అవుతోంది...',
     'common.submitting': 'సమర్పిస్తోంది...',
-    'common.error': 'ఏదో తప్పు జరిగింది',
+    'common.error': 'ఏదో తప్పు జరిగింది.',
     'common.success': 'విజయం!',
     'common.retry': 'మళ్ళీ ప్రయత్నించు',
     'common.back': 'వెనుకకు',
@@ -313,21 +633,87 @@ const translations: Record<Locale, Record<string, string>> = {
     'common.from': 'నుండి',
     'common.by': 'వారి',
     'common.contact': 'సంప్రదించు',
+    'common.save': 'సేవ్',
+    'common.cancel': 'రద్దు',
+    'common.delete': 'తొలగించు',
+    'msg.productAdded': 'ఉత్పత్తి విజయవంతంగా జోడించబడింది.',
+    'msg.productUpdated': 'ఉత్పత్తి విజయవంతంగా అప్‌డేట్ చేయబడింది.',
+    'msg.productDeleted': 'ఉత్పత్తి విజయవంతంగా తొలగించబడింది.',
+    'msg.productAddFail': 'ఉత్పత్తి జోడించడం విఫలమైంది.',
+    'msg.productUpdateFail': 'ఉత్పత్తి అప్‌డేట్ చేయడం విఫలమైంది.',
+    'msg.loginSuccess': 'లాగిన్ విజయవంతమైంది.',
+    'msg.registerSuccess': 'నమోదు విజయవంతమైంది.',
+    'msg.invalidCredentials': 'చెల్లని ఆధారాలు.',
+    'msg.accountExists': 'ఖాతా ఇప్పటికే ఉంది.',
+    'msg.requiredField': 'తప్పనిసరి ఫీల్డ్.',
+    'msg.invalidEmail': 'చెల్లని ఇమెయిల్.',
+    'msg.invalidPhone': 'దయచేసి సరైన ఫోన్ నంబర్‌ను నమోదు చేయండి.',
+    'msg.invalidOTP': 'చెల్లని OTP.',
+    'msg.otpExpired': 'OTP గడువు ముగిసింది.',
+    'msg.orderPlaced': 'ఆర్డర్ విజయవంతంగా ఉంచబడింది.',
+    'msg.orderSuccessful': 'ఆర్డర్ విజయవంతమైంది.',
+    'msg.orderCancelled': 'ఆర్డర్ విజయవంతంగా రద్దు చేయబడింది.',
+    'msg.uploadImage': 'దయచేసి చిత్రాన్ని అప్లోడ్ చేయండి.',
+    'msg.analysisFailed': 'చిత్ర విశ్లేషణ విఫలమైంది.',
+    'msg.noProducts': 'ఉత్పత్తులు కనుగొనబడలేదు.',
+    'msg.confirmDeleteProduct': 'మీరు ఖచ్చితంగా ఈ ఉత్పత్తిని తొలగించాలనుకుంటున్నారా?',
+
+    // Admin Dashboard
+    'admin.dashboard': 'అడ్మిన్ డాష్‌బోర్డ్',
+    'admin.users': 'వినియోగదారులు',
+    'admin.farmers': 'రైతులు',
+    'admin.buyers': 'కొనుగోలుదారులు',
+    'admin.products': 'ఉత్పత్తులు',
+    'admin.orders': 'ఆర్డర్లు',
+    'admin.reports': 'నివేదికలు',
+    'admin.analytics': 'విశ్లేషణలు',
+    'admin.aiResults': 'AI ఫలితాలు',
+    'admin.settings': 'సెట్టింగులు',
+    'admin.manageUsers': 'వినియోగదారులను నిర్వహించండి',
+    'admin.manageProducts': 'ఉత్పత్తులను నిర్వహించండి',
+    'admin.manageOrders': 'ఆర్డర్లను నిర్వహించండి',
+    'admin.approve': 'ఆమోదించు',
+    'admin.reject': 'తిరస్కరించు',
+    'admin.delete': 'తొలగించు',
+    'admin.viewDetails': 'వివరాలు చూడు',
   },
 
   hi: {
-    // Navigation
+    // Navigation & Global
     'nav.home': 'होम',
     'nav.browse': 'ब्राउज़ करें',
     'nav.search': 'खोजें',
     'nav.categories': 'श्रेणियाँ',
     'nav.nearby': 'नज़दीक',
-    'nav.orders': 'मेरे ऑर्डर',
+    'nav.orders': 'ऑर्डर',
     'nav.favorites': 'पसंदीदा',
     'nav.reviews': 'समीक्षाएँ',
     'nav.profile': 'प्रोफ़ाइल',
-    'nav.signOut': 'साइन आउट',
+    'nav.settings': 'सेटिंग्स',
+    'nav.signOut': 'लॉग आउट',
+    'nav.logout': 'लॉग आउट',
     'nav.language': 'भाषा',
+    'nav.dashboard': 'डैशबोर्ड',
+    'nav.products': 'उत्पाद',
+    'nav.marketplace': 'बाज़ार',
+    'nav.cart': 'कार्ट',
+    'nav.notifications': 'सूचनाएं',
+    'nav.messages': 'संदेश',
+    'nav.help': 'मदद',
+
+    // Home
+    'home.about': 'के बारे में',
+    'home.features': 'विशेषताएं',
+    'home.howItWorks': 'यह कैसे काम करता है',
+    'home.farmers': 'किसान',
+    'home.buyers': 'खरीदार',
+    'home.marketplace': 'बाज़ार',
+    'home.aiQuality': 'AI गुणवत्ता मूल्यांकन',
+    'home.contact': 'संपर्क करें',
+    'home.login': 'लॉगिन',
+    'home.register': 'पंजीकरण करें',
+    'home.getStarted': 'शुरू करें',
+    'home.learnMore': 'और जानें',
 
     // Farmer Sidebar
     'sidebar.overview': 'अवलोकन',
@@ -342,8 +728,10 @@ const translations: Record<Locale, Record<string, string>> = {
     'sidebar.settings': 'सेटिंग्स',
 
     // Dashboard
+    'dashboard.farmerDashboard': 'किसान डैशबोर्ड',
+    'dashboard.buyerDashboard': 'खरीदार डैशबोर्ड',
     'dashboard.overview': 'डैशबोर्ड अवलोकन',
-    'dashboard.welcomeBack': 'स्वागत है, किसान',
+    'dashboard.welcomeBack': 'स्वागत है',
     'dashboard.activeProducts': 'सक्रिय उत्पाद',
     'dashboard.pendingOrders': 'लंबित ऑर्डर',
     'dashboard.totalRevenue': 'कुल राजस्व',
@@ -352,22 +740,33 @@ const translations: Record<Locale, Record<string, string>> = {
     'dashboard.quickActions': 'त्वरित कार्य',
     'dashboard.noOrders': 'कोई ऑर्डर नहीं',
     'dashboard.viewAll': 'सभी देखें',
+    'dashboard.sales': 'बिक्री',
+    'dashboard.earnings': 'कमाई',
+    'dashboard.orderHistory': 'ऑर्डर इतिहास',
+    'dashboard.completedOrders': 'पूर्ण ऑर्डर',
 
     // Products
-    'product.addNew': 'नया उत्पाद जोड़ें',
+    'product.addNew': 'उत्पाद जोड़ें',
+    'product.addProduct': 'उत्पाद जोड़ें',
+    'product.editProduct': 'उत्पाद संपादित करें',
+    'product.deleteProduct': 'उत्पाद हटाएँ',
     'product.name': 'उत्पाद का नाम',
     'product.category': 'श्रेणी',
     'product.description': 'विवरण',
     'product.price': 'मूल्य',
     'product.quantity': 'मात्रा',
     'product.unit': 'इकाई',
+    'product.location': 'स्थान',
+    'product.availability': 'उपलब्धता',
     'product.harvestDate': 'फसल तिथि',
     'product.bestBefore': 'सर्वोत्तम तिथि से पहले',
     'product.status': 'सूची स्थिति',
     'product.published': 'प्रकाशित',
     'product.draft': 'ड्राफ़्ट',
     'product.images': 'उत्पाद चित्र',
+    'product.uploadImage': 'उत्पाद की तस्वीर अपलोड करें',
     'product.save': 'परिवर्तन सहेजें',
+    'product.update': 'उत्पाद अपडेट करें',
     'product.publish': 'उत्पाद प्रकाशित करें',
     'product.cancel': 'रद्द करें',
     'product.edit': 'संपादित करें',
@@ -376,8 +775,34 @@ const translations: Record<Locale, Record<string, string>> = {
     'product.addFirst': 'अपना पहला उत्पाद जोड़ें',
     'product.available': 'उपलब्ध',
     'product.orders': 'ऑर्डर',
+    'product.productDetails': 'उत्पाद विवरण',
+    'product.fruits': 'फल',
+    'product.vegetables': 'सब्जियां',
+    'product.farmer': 'किसान',
+    'product.qualityGrade': 'गुणवत्ता ग्रेड',
+    'product.marketPrice': 'बाजार मूल्य',
 
     // Orders
+    'order.orders': 'ऑर्डर',
+    'order.myOrders': 'मेरे ऑर्डर',
+    'order.orderId': 'ऑर्डर आईडी',
+    'order.product': 'उत्पाद',
+    'order.quantity': 'मात्रा',
+    'order.price': 'मूल्य',
+    'order.total': 'कुल',
+    'order.date': 'तारीख',
+    'order.farmer': 'किसान',
+    'order.buyer': 'खरीदार',
+    'order.location': 'स्थान',
+    'order.pending': 'लंबित',
+    'order.confirmed': 'पुष्ट',
+    'order.processing': 'प्रसंस्करण',
+    'order.shipped': 'भेज दिया',
+    'order.delivered': 'पहुंचा दिया',
+    'order.cancelled': 'रद्द',
+    'order.orderDetails': 'ऑर्डर विवरण',
+    'order.trackOrder': 'ऑर्डर ट्रैक करें',
+    'order.cancelOrder': 'ऑर्डर रद्द करें',
     'order.place': 'ऑर्डर करें',
     'order.status.PENDING': 'लंबित',
     'order.status.ACCEPTED': 'स्वीकृत',
@@ -391,36 +816,72 @@ const translations: Record<Locale, Record<string, string>> = {
     'order.noOrders': 'कोई ऑर्डर नहीं मिला',
     'order.delivery': 'डिलीवरी',
     'order.pickup': 'पिकअप',
-    'order.total': 'कुल',
     'order.note': 'नोट जोड़ें',
 
+    // Cart and Checkout
+    'cart.shoppingCart': 'शॉपिंग कार्ट',
+    'cart.yourCart': 'आपका कार्ट',
+    'cart.emptyCart': 'खाली कार्ट',
+    'cart.addToCart': 'कार्ट में डालें',
+    'cart.buyNow': 'अभी खरीदें',
+    'cart.remove': 'हटाएं',
+    'cart.quantity': 'मात्रा',
+    'cart.price': 'मूल्य',
+    'cart.subtotal': 'उप-योग',
+    'cart.total': 'कुल',
+    'cart.checkout': 'चेकआउट',
+    'cart.deliveryAddress': 'डिलीवरी का पता',
+    'cart.payment': 'भुगतान',
+    'cart.placeOrder': 'ऑर्डर दें',
+    'cart.confirmOrder': 'ऑर्डर की पुष्टि करें',
+
+    // Search and Filters
+    'market.search': 'खोजें',
+    'market.searchProducts': 'उत्पाद खोजें',
+    'market.filters': 'फ़िल्टर',
+    'market.sort': 'क्रमबद्ध करें',
+    'market.category': 'श्रेणी',
+    'market.price': 'मूल्य',
+    'market.quality': 'गुणवत्ता',
+    'market.location': 'स्थान',
+    'market.sortBy': 'क्रमबद्ध करें',
+    'market.allCategories': 'सभी श्रेणियाँ',
+    'market.newest': 'नवीनतम पहले',
+    'market.popular': 'सबसे लोकप्रिय',
+    'market.highestRated': 'उच्चतम रेटेड',
+    'market.priceLow': 'सबसे कम कीमत',
+    'market.priceHigh': 'सबसे अधिक कीमत',
+    'market.qualityHigh': 'उच्चतम गुणवत्ता',
+    'market.qualityLow': 'न्यूनतम गुणवत्ता',
+    'market.clearFilters': 'फ़िल्टर साफ़ करें',
+    'market.applyFilters': 'फ़िल्टर लागू करें',
+    'market.noProducts': 'कोई उत्पाद नहीं मिला',
+    'market.browseProducts': 'उत्पाद देखें',
+    'market.nearbyFarmers': 'नज़दीकी किसान',
+
     // Auth
-    'auth.login': 'साइन इन',
-    'auth.register': 'खाता बनाएँ',
-    'auth.email': 'ईमेल पता',
+    'auth.login': 'लॉगिन',
+    'auth.register': 'रजिस्टर करें',
+    'auth.signUp': 'साइन अप करें',
+    'auth.email': 'ईमेल',
+    'auth.phoneNumber': 'फ़ोन नंबर',
     'auth.password': 'पासवर्ड',
-    'auth.name': 'पूरा नाम',
+    'auth.name': 'नाम',
     'auth.confirmPassword': 'पासवर्ड की पुष्टि करें',
+    'auth.forgotPassword': 'पासवर्ड भूल गए',
+    'auth.resetPassword': 'पासवर्ड रीसेट करें',
+    'auth.sendOTP': 'OTP भेजें',
+    'auth.verifyOTP': 'OTP सत्यापित करें',
+    'auth.enterOTP': 'OTP दर्ज करें',
+    'auth.resendOTP': 'OTP पुनः भेजें',
+    'auth.verifyEmail': 'ईमेल सत्यापित करें',
+    'auth.verifyPhone': 'फ़ोन नंबर सत्यापित करें',
     'auth.farmer': 'उत्पाद बेचें',
     'auth.consumer': 'उत्पाद खरीदें',
     'auth.noAccount': 'खाता नहीं है?',
     'auth.haveAccount': 'पहले से खाता है?',
     'auth.signIn': 'साइन इन',
     'auth.createAccount': 'खाता बनाएँ',
-
-    // Marketplace
-    'market.search': 'टमाटर, आम, चावल खोजें...',
-    'market.filters': 'फ़िल्टर',
-    'market.sortBy': 'क्रमबद्ध करें',
-    'market.allCategories': 'सभी श्रेणियाँ',
-    'market.newest': 'नवीनतम पहले',
-    'market.popular': 'सबसे लोकप्रिय',
-    'market.highestRated': 'उच्चतम रेटेड',
-    'market.priceLow': 'मूल्य: कम से अधिक',
-    'market.priceHigh': 'मूल्य: अधिक से कम',
-    'market.noProducts': 'कोई उत्पाद नहीं मिला',
-    'market.browseProducts': 'उत्पाद देखें',
-    'market.nearbyFarmers': 'नज़दीकी किसान',
 
     // Location
     'location.useCurrentLocation': 'वर्तमान स्थान उपयोग करें',
@@ -434,12 +895,52 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // AI Quality
     'ai.title': 'AI गुणवत्ता जाँच',
-    'ai.upload': 'विश्लेषण के लिए फसल की फोटो अपलोड करें',
-    'ai.analyzing': 'विश्लेषण हो रहा है...',
+    'ai.upload': 'उत्पाद की तस्वीर अपलोड करें',
+    'ai.selectImage': 'छवि चुनें',
+    'ai.takePhoto': 'तस्वीर लें',
+    'ai.analyze': 'गुणवत्ता का विश्लेषण करें',
+    'ai.analyzing': 'छवि संसाधित की जा रही है...',
+    'ai.analysisComplete': 'विश्लेषण पूरा हुआ',
     'ai.grade': 'गुणवत्ता ग्रेड',
+    'ai.score': 'गुणवत्ता स्कोर',
     'ai.confidence': 'विश्वसनीयता',
+    'ai.excellent': 'उत्कृष्ट गुणवत्ता',
+    'ai.good': 'अच्छी गुणवत्ता',
+    'ai.average': 'औसत गुणवत्ता',
+    'ai.poor': 'कम गुणवत्ता',
+    'ai.recommendation': 'सिफारिश',
+    'ai.result': 'AI परिणाम',
+    'ai.tryAgain': 'पुनः प्रयास करें',
+    'ai.uploadAnother': 'एक और छवि अपलोड करें',
     'ai.notConnected': 'AI मॉडल कनेक्ट नहीं है',
     'ai.modelRequired': 'गुणवत्ता मूल्यांकन सक्षम करने के लिए AI मॉडल कनेक्ट करें',
+
+    // Profile and Settings
+    'profile.title': 'प्रोफ़ाइल',
+    'profile.personalInfo': 'व्यक्तिगत जानकारी',
+    'profile.name': 'नाम',
+    'profile.email': 'ईमेल',
+    'profile.phone': 'फ़ोन नंबर',
+    'profile.address': 'पता',
+    'profile.location': 'स्थान',
+    'profile.edit': 'प्रोफ़ाइल संपादित करें',
+    'profile.save': 'परिवर्तन सहेजें',
+    'profile.changePassword': 'पासवर्ड बदलें',
+    'profile.language': 'भाषा',
+    'profile.account': 'खाता',
+    'profile.settings': 'सेटिंग्स',
+
+    // Notifications
+    'notification.title': 'सूचनाएं',
+    'notification.newOrder': 'नया ऑर्डर',
+    'notification.orderUpdate': 'ऑर्डर अपडेट',
+    'notification.productUpdate': 'उत्पाद अपडेट',
+    'notification.paymentUpdate': 'भुगतान अपडेट',
+    'notification.aiComplete': 'AI विश्लेषण पूरा हुआ',
+    'notification.newMessage': 'नया संदेश',
+    'notification.markAsRead': 'पढ़ा हुआ चिह्नित करें',
+    'notification.markAllAsRead': 'सभी को पढ़ा हुआ चिह्नित करें',
+    'notification.noNotifications': 'कोई सूचना नहीं',
 
     // Reviews
     'review.submit': 'समीक्षा जमा करें',
@@ -450,11 +951,11 @@ const translations: Record<Locale, Record<string, string>> = {
     'review.pendingReviews': 'लंबित समीक्षाएँ',
     'review.pastReviews': 'पिछली समीक्षाएँ',
 
-    // Common
+    // Common Messages
     'common.loading': 'लोड हो रहा है...',
     'common.saving': 'सहेज रहा है...',
     'common.submitting': 'जमा कर रहा है...',
-    'common.error': 'कुछ गलत हो गया',
+    'common.error': 'कुछ गलत हो गया।',
     'common.success': 'सफलता!',
     'common.retry': 'पुनः प्रयास करें',
     'common.back': 'वापस',
@@ -462,6 +963,49 @@ const translations: Record<Locale, Record<string, string>> = {
     'common.from': 'से',
     'common.by': 'द्वारा',
     'common.contact': 'संपर्क करें',
+    'common.save': 'सहेजें',
+    'common.cancel': 'रद्द करें',
+    'common.delete': 'हटाएँ',
+    'msg.productAdded': 'उत्पाद सफलतापूर्वक जोड़ा गया।',
+    'msg.productUpdated': 'उत्पाद सफलतापूर्वक अपडेट किया गया।',
+    'msg.productDeleted': 'उत्पाद सफलतापूर्वक हटा दिया गया।',
+    'msg.productAddFail': 'उत्पाद जोड़ने में विफल।',
+    'msg.productUpdateFail': 'उत्पाद अपडेट करने में विफल।',
+    'msg.loginSuccess': 'लॉगिन सफल।',
+    'msg.registerSuccess': 'पंजीकरण सफल।',
+    'msg.invalidCredentials': 'अमान्य क्रेडेंशियल।',
+    'msg.accountExists': 'खाता पहले से मौजूद है।',
+    'msg.requiredField': 'आवश्यक फ़ील्ड।',
+    'msg.invalidEmail': 'अमान्य ईमेल।',
+    'msg.invalidPhone': 'कृपया एक वैध फोन नंबर दर्ज करें।',
+    'msg.invalidOTP': 'अमान्य OTP.',
+    'msg.otpExpired': 'OTP समाप्त हो गया।',
+    'msg.orderPlaced': 'ऑर्डर सफलतापूर्वक दिया गया।',
+    'msg.orderSuccessful': 'ऑर्डर सफल रहा।',
+    'msg.orderCancelled': 'ऑर्डर सफलतापूर्वक रद्द कर दिया गया।',
+    'msg.uploadImage': 'कृपया एक छवि अपलोड करें।',
+    'msg.analysisFailed': 'छवि विश्लेषण विफल रहा।',
+    'msg.noProducts': 'कोई उत्पाद नहीं मिला।',
+    'msg.confirmDeleteProduct': 'क्या आप वाकई इस उत्पाद को हटाना चाहते हैं?',
+
+    // Admin Dashboard
+    'admin.dashboard': 'व्यवस्थापक डैशबोर्ड',
+    'admin.users': 'उपयोगकर्ता',
+    'admin.farmers': 'किसान',
+    'admin.buyers': 'खरीदार',
+    'admin.products': 'उत्पाद',
+    'admin.orders': 'ऑर्डर',
+    'admin.reports': 'रिपोर्ट',
+    'admin.analytics': 'एनालिटिक्स',
+    'admin.aiResults': 'AI परिणाम',
+    'admin.settings': 'सेटिंग्स',
+    'admin.manageUsers': 'उपयोगकर्ताओं को प्रबंधित करें',
+    'admin.manageProducts': 'उत्पादों को प्रबंधित करें',
+    'admin.manageOrders': 'ऑर्डर प्रबंधित करें',
+    'admin.approve': 'स्वीकार करें',
+    'admin.reject': 'अस्वीकार करें',
+    'admin.delete': 'हटाएँ',
+    'admin.viewDetails': 'विवरण देखें',
   },
 }
 
@@ -482,28 +1026,74 @@ const I18nContext = createContext<I18nContextType>({
 const STORAGE_KEY = 'agrimarket-locale'
 
 export function I18nProvider({ children }: { children: ReactNode }) {
+  const { data: session, status, update } = useSession()
   const [locale, setLocaleState] = useState<Locale>('en')
+  const [isInitialized, setIsInitialized] = useState(false)
 
+  // Language priority logic on initial load
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
-    if (stored && translations[stored]) {
-      setLocaleState(stored)
-    }
-  }, [])
+    if (isInitialized) return
 
-  const setLocale = (newLocale: Locale) => {
+    let initialLocale: Locale = 'en'
+
+    // 1. Session preference
+    if (session?.user?.preferredLanguage) {
+      initialLocale = session.user.preferredLanguage as Locale
+    } else {
+      // 2. Local Storage
+      const stored = localStorage.getItem(STORAGE_KEY) as Locale | null
+      if (stored && ['en', 'te', 'hi'].includes(stored)) {
+        initialLocale = stored
+      } else {
+        // 3. Browser language
+        if (typeof navigator !== 'undefined') {
+          const browserLang = navigator.language.slice(0, 2)
+          if (['en', 'te', 'hi'].includes(browserLang)) {
+            initialLocale = browserLang as Locale
+          }
+        }
+      }
+    }
+
+    setLocaleState(initialLocale)
+    document.documentElement.lang = initialLocale
+    
+    // Only initialize when auth status is resolved (so we don't flash default while loading session)
+    if (status !== 'loading') {
+      setIsInitialized(true)
+    }
+  }, [session, status, isInitialized])
+
+  // Exposed setter
+  const setLocale = useCallback(async (newLocale: Locale) => {
     setLocaleState(newLocale)
+    document.documentElement.lang = newLocale
     localStorage.setItem(STORAGE_KEY, newLocale)
-    // Update document lang attribute
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = newLocale
+
+    // Sync with database if logged in
+    if (session?.user) {
+      try {
+        await fetch('/api/user/language', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ language: newLocale })
+        })
+        
+        // Tell NextAuth session to update its token if we passed trigger='update' in auth.ts
+        await update({ preferredLanguage: newLocale })
+      } catch (error) {
+        console.error('Failed to save language preference to database:', error)
+      }
     }
-  }
+  }, [session, update])
 
-  const t = (key: string, fallback?: string): string => {
+  const t = useCallback((key: string, fallback?: string): string => {
     return translations[locale]?.[key] || translations.en[key] || fallback || key
-  }
+  }, [locale])
 
+  // To prevent hydration mismatch, you could optionally return nothing until initialized,
+  // but for SEO and fast render, defaulting to 'en' is usually fine.
+  
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>
       {children}

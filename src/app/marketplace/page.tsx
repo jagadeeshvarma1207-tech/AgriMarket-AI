@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/marketplace/ProductCard'
 import { PRODUCT_CATEGORIES } from '@/lib/validation'
 import { Leaf, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 export default function PublicMarketplacePage() {
   const [products, setProducts] = useState<any[]>([])
@@ -14,6 +16,7 @@ export default function PublicMarketplacePage() {
   const [grade, setGrade] = useState('')
   const [sort, setSort] = useState('createdAt')
   const [showFilters, setShowFilters] = useState(false)
+  const { t } = useI18n()
 
   useEffect(() => {
     setLoading(true)
@@ -43,9 +46,10 @@ export default function PublicMarketplacePage() {
             </div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem' }}>AgriMarket <span style={{ color: 'var(--color-primary-light)' }}>AI</span></span>
           </Link>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <Link href="/auth/login" className="btn btn-ghost btn-sm">Sign In</Link>
-            <Link href="/auth/register" className="btn btn-primary btn-sm">Get Started</Link>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <LanguageSelector />
+            <Link href="/auth/login" className="btn btn-ghost btn-sm">{t('auth.login', 'Sign In')}</Link>
+            <Link href="/auth/register" className="btn btn-primary btn-sm">{t('auth.register', 'Get Started')}</Link>
           </div>
         </div>
       </nav>
@@ -55,13 +59,13 @@ export default function PublicMarketplacePage() {
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.25)', borderRadius: 999, padding: '5px 14px', marginBottom: 16 }}>
             <Sparkles size={13} color="var(--color-ai-light)" />
-            <span style={{ fontSize: '0.75rem', color: 'var(--color-ai-light)', fontWeight: 600 }}>AI Quality Graded Produce</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-ai-light)', fontWeight: 600 }}>{t('landing.aiQuality', 'AI Quality Graded Produce')}</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', marginBottom: 8 }}>
-            Browse Fresh Produce
+            {t('sidebar.browse', 'Browse Fresh Produce')}
           </h1>
           <p style={{ color: 'var(--color-text-secondary)', maxWidth: 500 }}>
-            Discover fresh fruits and vegetables directly from local farmers. All produce AI quality-graded for transparency.
+            {t('landing.subtitle', 'Discover fresh fruits and vegetables directly from local farmers. All produce AI quality-graded for transparency.')}
           </p>
         </div>
 
@@ -87,21 +91,21 @@ export default function PublicMarketplacePage() {
           <div className="filter-panel" style={{ marginBottom: 24 }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
               <div>
-                <p className="filter-section-title">Category</p>
+                <p className="filter-section-title">{t('product.category', 'Category')}</p>
                 <select className="form-select" value={category} onChange={e => setCategory(e.target.value)}>
-                  <option value="">All Categories</option>
-                  {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="">{t('common.viewAll', 'All Categories')}</option>
+                  {PRODUCT_CATEGORIES.map(c => <option key={c} value={c}>{t(`product.${c.toLowerCase().replace(/[\s&]+/g, '')}`, c)}</option>)}
                 </select>
               </div>
               <div>
-                <p className="filter-section-title">AI Quality Grade</p>
+                <p className="filter-section-title">{t('ai.confidence', 'AI Quality Grade')}</p>
                 <select className="form-select" value={grade} onChange={e => setGrade(e.target.value)}>
-                  <option value="">Any Grade</option>
-                  <option value="A">Grade A — Premium</option>
-                  <option value="B">Grade B — Good</option>
-                  <option value="C">Grade C — Fair</option>
-                  <option value="D">Grade D — Economy</option>
-                  <option value="UNGRADED">Ungraded</option>
+                  <option value="">{t('common.viewAll', 'Any Grade')}</option>
+                  <option value="A">{t('ai.grade', 'Grade')} A — Premium</option>
+                  <option value="B">{t('ai.grade', 'Grade')} B — Good</option>
+                  <option value="C">{t('ai.grade', 'Grade')} C — Fair</option>
+                  <option value="D">{t('ai.grade', 'Grade')} D — Economy</option>
+                  <option value="UNGRADED">{t('ai.ungraded', 'Ungraded')}</option>
                 </select>
               </div>
             </div>
@@ -120,8 +124,7 @@ export default function PublicMarketplacePage() {
         ) : products.length === 0 ? (
           <div className="empty-state" style={{ paddingTop: 80 }}>
             <Search size={48} style={{ color: 'var(--color-text-muted)' }} />
-            <h3>No products found</h3>
-            <p>Try different filters or check back later for new listings.</p>
+            <h3>{t('msg.noProducts', 'No products found')}</h3>
           </div>
         ) : (
           <>
@@ -129,12 +132,9 @@ export default function PublicMarketplacePage() {
               {products.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
             <div style={{ marginTop: 48, textAlign: 'center' }}>
-              <p style={{ color: 'var(--color-text-secondary)', marginBottom: 16 }}>
-                Want to save favorites and place orders?
-              </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-                <Link href="/auth/register?role=CONSUMER" className="btn btn-primary">Create Free Account</Link>
-                <Link href="/auth/login" className="btn btn-ghost">Sign In</Link>
+                <Link href="/auth/register?role=CONSUMER" className="btn btn-primary">{t('auth.register', 'Create Free Account')}</Link>
+                <Link href="/auth/login" className="btn btn-ghost">{t('auth.login', 'Sign In')}</Link>
               </div>
             </div>
           </>

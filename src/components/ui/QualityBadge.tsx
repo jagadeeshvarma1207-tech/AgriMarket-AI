@@ -1,5 +1,6 @@
 import { GRADE_INFO, type QualityGrade } from '@/lib/ai-service'
 import { Sparkles, Award } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
 
 interface QualityBadgeProps {
   grade: string
@@ -13,6 +14,7 @@ export function QualityBadge({ grade, confidence, size = 'md', showLabel = false
   const key = grade as QualityGrade
   const info = GRADE_INFO[key] || GRADE_INFO['UNGRADED']
   const gradeClass = `grade-${grade.toLowerCase()}`
+  const { t } = useI18n()
 
   const sizes = {
     sm: { fontSize: '0.7rem', padding: '0.15rem 0.5rem', iconSize: 10 },
@@ -30,17 +32,17 @@ export function QualityBadge({ grade, confidence, size = 'md', showLabel = false
         title={info.description}
       >
         <Award size={s.iconSize} />
-        {grade === 'UNGRADED' ? 'Ungraded' : `Grade ${grade}`}
+        {grade === 'UNGRADED' ? t('ai.ungraded', 'Ungraded') : `${t('ai.grade', 'Grade')} ${grade}`}
         {isPlaceholder && (
           <Sparkles size={s.iconSize} style={{ opacity: 0.7 }} />
         )}
       </span>
       {showLabel && (
         <span style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>
-          {info.label}
+          {t(`ai.quality.${info.label.toLowerCase().replace(/\s+/g, '')}`, info.label)}
           {confidence !== undefined && confidence > 0 && (
             <span style={{ marginLeft: '6px', color: 'var(--color-ai-light)' }}>
-              {Math.round(confidence)}% confidence
+              {Math.round(confidence)}% {t('ai.confidence', 'confidence')}
             </span>
           )}
         </span>

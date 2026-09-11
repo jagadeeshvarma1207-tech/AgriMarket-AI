@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { Leaf, Eye, EyeOff, AlertCircle, CheckCircle, Tractor, ShoppingBag } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 function RegisterPageInner() {
   const router = useRouter()
@@ -17,6 +19,7 @@ function RegisterPageInner() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [apiError, setApiError] = useState('')
+  const { t } = useI18n()
 
   const set = (k: string, v: string) => {
     setForm((f) => ({ ...f, [k]: v }))
@@ -67,6 +70,11 @@ function RegisterPageInner() {
     <div style={{ minHeight: '100vh', background: 'var(--color-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
       <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse at 70% 60%, rgba(139,92,246,0.08) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
+      {/* Top right language selector */}
+      <div style={{ position: 'absolute', top: 24, right: 24 }}>
+        <LanguageSelector />
+      </div>
+
       <div style={{ width: '100%', maxWidth: 480, position: 'relative' }}>
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
@@ -75,11 +83,11 @@ function RegisterPageInner() {
             </div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.3rem' }}>AgriMarket AI</span>
           </Link>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 6 }}>Create your free account</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 6 }}>{t('auth.createAccount', 'Create your free account')}</p>
         </div>
 
         <div className="card" style={{ padding: 32 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', marginBottom: 24, textAlign: 'center' }}>Join AgriMarket</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', marginBottom: 24, textAlign: 'center' }}>{t('auth.signUp', 'Join AgriMarket')}</h2>
 
           {apiError && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 20 }}>
@@ -91,11 +99,11 @@ function RegisterPageInner() {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             {/* Role selection */}
             <div className="form-group">
-              <label className="form-label">I want to <span style={{ color: 'var(--color-danger)' }}>*</span></label>
+              <label className="form-label">{t('nav.profile', 'I want to')} <span style={{ color: 'var(--color-danger)' }}>*</span></label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {[
-                  { value: 'FARMER', label: 'Sell Produce', sub: 'I am a farmer', icon: Tractor, color: 'var(--color-primary)' },
-                  { value: 'CONSUMER', label: 'Buy Produce', sub: 'I am a consumer', icon: ShoppingBag, color: 'var(--color-accent)' },
+                  { value: 'FARMER', label: t('auth.farmer', 'Sell Produce'), sub: 'I am a farmer', icon: Tractor, color: 'var(--color-primary)' },
+                  { value: 'CONSUMER', label: t('auth.consumer', 'Buy Produce'), sub: 'I am a consumer', icon: ShoppingBag, color: 'var(--color-accent)' },
                 ].map((r) => (
                   <button
                     key={r.value}
@@ -119,19 +127,19 @@ function RegisterPageInner() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Full name</label>
+              <label className="form-label">{t('auth.name', 'Full name')}</label>
               <input type="text" className="form-input" placeholder="Your name" value={form.name} onChange={(e) => set('name', e.target.value)} autoComplete="name" />
               {errors.name && <span className="form-error"><AlertCircle size={13} />{errors.name}</span>}
             </div>
 
             <div className="form-group">
-              <label className="form-label">Email address</label>
+              <label className="form-label">{t('auth.email', 'Email address')}</label>
               <input type="email" className="form-input" placeholder="you@example.com" value={form.email} onChange={(e) => set('email', e.target.value)} autoComplete="email" />
               {errors.email && <span className="form-error"><AlertCircle size={13} />{errors.email}</span>}
             </div>
 
             <div className="form-group">
-              <label className="form-label">Password</label>
+              <label className="form-label">{t('auth.password', 'Password')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPw ? 'text' : 'password'} className="form-input"
@@ -147,7 +155,7 @@ function RegisterPageInner() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Confirm password</label>
+              <label className="form-label">{t('auth.confirmPassword', 'Confirm password')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPw ? 'text' : 'password'} className="form-input"
@@ -163,14 +171,14 @@ function RegisterPageInner() {
             </div>
 
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem', marginTop: 4 }}>
-              {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Creating account...</> : 'Create Account'}
+              {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> {t('common.submitting', 'Creating account...')}</> : t('auth.createAccount', 'Create Account')}
             </button>
           </form>
 
           <div className="divider" style={{ margin: '20px 0' }} />
           <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-            Already have an account?{' '}
-            <Link href="/auth/login" style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>Sign in</Link>
+            {t('auth.haveAccount', 'Already have an account?')}
+            <Link href="/auth/login" style={{ color: 'var(--color-primary-light)', fontWeight: 600, marginLeft: 4 }}>{t('auth.signIn', 'Sign in')}</Link>
           </p>
         </div>
       </div>

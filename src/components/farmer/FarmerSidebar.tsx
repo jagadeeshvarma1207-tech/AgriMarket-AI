@@ -8,6 +8,8 @@ import {
   MessageSquare, MapPin, Star, User, Settings, LogOut,
   ChevronLeft, Menu, Leaf
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 const NAV_ITEMS = [
   { label: 'Overview', href: '/farmer/dashboard', icon: LayoutDashboard },
@@ -26,6 +28,7 @@ export function FarmerSidebar({ unreadMessages = 0, pendingOrders = 0 }: { unrea
   const pathname = usePathname()
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { t } = useI18n()
 
   const badges: Record<string, number> = {
     '/farmer/messages': unreadMessages,
@@ -66,8 +69,8 @@ export function FarmerSidebar({ unreadMessages = 0, pendingOrders = 0 }: { unrea
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1rem', color: 'var(--color-text)' }}>
               AgriMarket
             </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-primary-light)', fontWeight: 600 }}>
-              FARMER
+            <div style={{ fontSize: '0.7rem', color: 'var(--color-primary-light)', fontWeight: 600, textTransform: 'uppercase' }}>
+              {t('product.farmer', 'FARMER')}
             </div>
           </div>
         </div>
@@ -78,6 +81,12 @@ export function FarmerSidebar({ unreadMessages = 0, pendingOrders = 0 }: { unrea
             const Icon = item.icon
             const isActive = pathname === item.href || (item.href !== '/farmer/dashboard' && pathname.startsWith(item.href))
             const badge = badges[item.href]
+            
+            let tKey = 'sidebar.' + item.label.replace(/\s+/g, '').toLowerCase()
+            if (item.label === 'My Products') tKey = 'sidebar.myProducts'
+            if (item.label === 'Add Product') tKey = 'sidebar.addProduct'
+            if (item.label === 'AI Quality Check') tKey = 'sidebar.aiQuality'
+
             return (
               <Link
                 key={item.href}
@@ -86,7 +95,7 @@ export function FarmerSidebar({ unreadMessages = 0, pendingOrders = 0 }: { unrea
                 onClick={() => setMobileOpen(false)}
               >
                 <Icon size={18} />
-                <span>{item.label}</span>
+                <span>{t(tKey, item.label)}</span>
                 {badge && badge > 0 ? (
                   <span className="sidebar-nav-badge">{badge}</span>
                 ) : item.href === '/farmer/ai-quality' ? (
@@ -110,18 +119,21 @@ export function FarmerSidebar({ unreadMessages = 0, pendingOrders = 0 }: { unrea
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {session?.user.name}
+                {session?.user?.name}
               </div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>Farmer</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>{t('product.farmer', 'Farmer')}</div>
             </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '0 8px' }}>
+            <LanguageSelector />
           </div>
           <button
             className="sidebar-nav-item"
             onClick={() => signOut({ callbackUrl: '/' })}
-            style={{ color: 'var(--color-danger)', width: '100%' }}
+            style={{ color: 'var(--color-danger)', width: '100%', marginTop: '4px' }}
           >
             <LogOut size={16} />
-            <span>Sign out</span>
+            <span>{t('nav.signOut', 'Sign out')}</span>
           </button>
         </div>
       </aside>

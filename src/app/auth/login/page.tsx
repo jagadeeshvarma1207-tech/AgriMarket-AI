@@ -4,6 +4,8 @@ import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Leaf, Eye, EyeOff, AlertCircle, LogIn } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
+import LanguageSelector from '@/components/ui/LanguageSelector'
 
 function LoginPageInner() {
   const router = useRouter()
@@ -14,6 +16,7 @@ function LoginPageInner() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const { t } = useI18n()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,6 +55,11 @@ function LoginPageInner() {
       {/* Background */}
       <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse at 30% 40%, rgba(22,163,74,0.1) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
+      {/* Top right language selector */}
+      <div style={{ position: 'absolute', top: 24, right: 24 }}>
+        <LanguageSelector />
+      </div>
+
       <div style={{ width: '100%', maxWidth: 420, position: 'relative' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
@@ -61,23 +69,23 @@ function LoginPageInner() {
             </div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.4rem' }}>AgriMarket <span style={{ color: 'var(--color-primary-light)' }}>AI</span></span>
           </Link>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 8 }}>Sign in to your account</p>
+          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginTop: 8 }}>{t('home.login', 'Sign in to your account')}</p>
         </div>
 
         {/* Card */}
         <div className="card" style={{ padding: 32 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: 24, textAlign: 'center' }}>Welcome back</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: 24, textAlign: 'center' }}>{t('dashboard.welcomeBack', 'Welcome back')}</h2>
 
           {error && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--color-danger-pale)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 10, padding: '12px 16px', marginBottom: 20 }}>
               <AlertCircle size={16} color="var(--color-danger)" />
-              <span style={{ fontSize: '0.9rem', color: '#fca5a5' }}>{error}</span>
+              <span style={{ fontSize: '0.9rem', color: '#fca5a5' }}>{error === 'Incorrect password' ? t('msg.invalidCredentials', 'Invalid credentials.') : error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div className="form-group">
-              <label className="form-label">Email address</label>
+              <label className="form-label">{t('auth.email', 'Email address')}</label>
               <input
                 type="email"
                 className="form-input"
@@ -90,7 +98,7 @@ function LoginPageInner() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Password</label>
+              <label className="form-label">{t('auth.password', 'Password')}</label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPw ? 'text' : 'password'}
@@ -118,7 +126,7 @@ function LoginPageInner() {
               disabled={loading}
               style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem', marginTop: 4 }}
             >
-              {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Signing in...</> : <><LogIn size={16} /> Sign In</>}
+              {loading ? <><div className="spinner" style={{ width: 18, height: 18 }} /> {t('common.loading', 'Signing in...')}</> : <><LogIn size={16} /> {t('auth.signIn', 'Sign In')}</>}
             </button>
           </form>
 
@@ -146,8 +154,8 @@ function LoginPageInner() {
           </div>
 
           <p style={{ textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>
-            Don&apos;t have an account?{' '}
-            <Link href="/auth/register" style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>Create one</Link>
+            {t('auth.noAccount', "Don't have an account?")}{' '}
+            <Link href="/auth/register" style={{ color: 'var(--color-primary-light)', fontWeight: 600 }}>{t('auth.createAccount', 'Create one')}</Link>
           </p>
         </div>
       </div>
